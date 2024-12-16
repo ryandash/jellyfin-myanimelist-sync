@@ -1,12 +1,13 @@
+using jellyfin_ani_sync.Api;
+using jellyfin_ani_sync.Models.Mal;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using jellyfin_ani_sync.Api;
-using jellyfin_ani_sync.Models.Mal;
 
 namespace jellyfin_ani_sync.Helpers;
 
-public interface IApiCallHelpers {
+public interface IApiCallHelpers
+{
     Task<List<Anime>> SearchAnime(string query);
     Task<Anime> GetAnime(int id, string alternativeId = null, bool getRelated = false);
     Task<Anime> GetAnime(AnimeOfflineDatabaseHelpers.OfflineDatabaseResponse ids, string title, bool getRelated = false);

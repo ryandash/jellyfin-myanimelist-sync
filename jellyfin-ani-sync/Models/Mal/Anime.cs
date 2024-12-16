@@ -2,24 +2,29 @@ using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace jellyfin_ani_sync.Models.Mal {
-    public class MainPicture {
+namespace jellyfin_ani_sync.Models.Mal
+{
+    public class MainPicture
+    {
         [JsonPropertyName("medium")] public string Medium { get; set; }
         [JsonPropertyName("large")] public string Large { get; set; }
     }
 
-    public class AlternativeTitles {
+    public class AlternativeTitles
+    {
         [JsonPropertyName("synonyms")] public List<string> Synonyms { get; set; }
         [JsonPropertyName("en")] public string En { get; set; }
         [JsonPropertyName("ja")] public string Ja { get; set; }
     }
 
-    public class Genre {
+    public class Genre
+    {
         [JsonPropertyName("id")] public int Id { get; set; }
         [JsonPropertyName("name")] public string Name { get; set; }
     }
 
-    public class MyListStatus {
+    public class MyListStatus
+    {
         [JsonPropertyName("status")] public Status Status { get; set; }
         [JsonPropertyName("score")] public int Score { get; set; }
 
@@ -33,22 +38,26 @@ namespace jellyfin_ani_sync.Models.Mal {
         public int? RewatchCount { get; set; }
     }
 
-    public class StartSeason {
+    public class StartSeason
+    {
         [JsonPropertyName("year")] public int Year { get; set; }
         [JsonPropertyName("season")] public string Season { get; set; }
     }
 
-    public class Broadcast {
+    public class Broadcast
+    {
         [JsonPropertyName("day_of_the_week")] public string DayOfTheWeek { get; set; }
         [JsonPropertyName("start_time")] public string StartTime { get; set; }
     }
 
-    public class Studio {
+    public class Studio
+    {
         [JsonPropertyName("id")] public int Id { get; set; }
         [JsonPropertyName("name")] public string Name { get; set; }
     }
 
-    public class RelatedAnime {
+    public class RelatedAnime
+    {
         [JsonPropertyName("node")] public Anime Anime { get; set; }
 
         [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -59,7 +68,8 @@ namespace jellyfin_ani_sync.Models.Mal {
         public string RelationTypeFormatted { get; set; }
     }
 
-    public enum RelationType {
+    public enum RelationType
+    {
         Parent_Story,
         Spin_Off,
         Side_Story,
@@ -73,19 +83,22 @@ namespace jellyfin_ani_sync.Models.Mal {
         Other
     }
 
-    public class Picture {
+    public class Picture
+    {
         [JsonPropertyName("medium")] public string Medium { get; set; }
         [JsonPropertyName("large")] public string Large { get; set; }
     }
 
-    public class Recommendation {
+    public class Recommendation
+    {
         [JsonPropertyName("node")] public Anime Anime { get; set; }
 
         [JsonPropertyName("num_recommendations")]
         public int NumRecommendations { get; set; }
     }
 
-    public class Anime {
+    public class Anime
+    {
         [JsonPropertyName("id")] public int Id { get; set; }
         public string AlternativeId { get; set; }
         [JsonPropertyName("title")] public string Title { get; set; }
@@ -133,15 +146,18 @@ namespace jellyfin_ani_sync.Models.Mal {
         [JsonPropertyName("studios")] public List<Studio> Studios { get; set; }
     }
 
-    public class AnimeList {
+    public class AnimeList
+    {
         [JsonPropertyName("node")] public Anime Anime { get; set; }
     }
 
-    public class SearchAnimeResponse {
+    public class SearchAnimeResponse
+    {
         [JsonPropertyName("data")] public List<AnimeList> Data { get; set; }
     }
 
-    public enum AiringStatus {
+    public enum AiringStatus
+    {
         finished_airing,
         currently_airing,
         not_yet_aired

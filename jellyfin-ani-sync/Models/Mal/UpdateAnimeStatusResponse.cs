@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace jellyfin_ani_sync.Models.Mal {
-    public class UpdateAnimeStatusResponse : ListStatus {
+namespace jellyfin_ani_sync.Models.Mal
+{
+    public class UpdateAnimeStatusResponse : ListStatus
+    {
         [JsonPropertyName("finish_date")] public string FinishDate { get; set; }
         [JsonPropertyName("priority")] public int Priority { get; set; }
 
