@@ -105,68 +105,6 @@ namespace jellyfin_ani_sync.Helpers
                 }
             }
 
-            //Search for tvdb id at series level
-            if (video is Episode)
-            {
-                providers = (video as Episode).Series.ProviderIds;
-            }
-
-            if (providers.ContainsKey("Tvdb"))
-            {
-                int tvDbId;
-                if (!int.TryParse(providers["Tvdb"], out tvDbId)) return (null, null);
-                var related = animeListXml.Anime.Where(anime => int.TryParse(anime.Tvdbid, out int xmlTvDbId) && xmlTvDbId == tvDbId).ToList();
-
-                if (!related.Any())
-                {
-                    logger.LogWarning("(Tvdb) Anime not found in anime list XML; querying the appropriate providers API");
-                    return (null, null);
-                }
-
-                logger.LogInformation("(Tvdb) Anime reference found in anime list XML");
-
-                var first = related.First();
-                if (related.Count() == 1)
-                {
-                    return (
-                        int.TryParse(first.MyAnimeListid, out MyAnimeListId) ? MyAnimeListId : null,
-                        int.TryParse(first.Episodeoffset, out var episodeOffset) ? episodeOffset : null
-                    );
-                }
-
-                if (video is Episode episode && episode.Series.Children.OfType<Season>().Count() > 1)
-                {
-                    var (MyAnimeList, episodeOffset) = GetMyAnimeListByEpisodeOffset(logger, GetAbsoluteEpisodeNumber(episode), seasonNumber, episodeNumber, related);
-                    if (MyAnimeList != null)
-                    {
-                        logger.LogInformation($"(Tvdb) Anime {episode.Series.Name} found in anime XML file, detected MyAnimeList ID {MyAnimeList}");
-                        return (MyAnimeList.Value, episodeOffset);
-                    }
-                    else
-                    {
-                        logger.LogInformation($"(Tvdb) Anime {episode.Series.Name} could not found in anime XML file; falling back to other metadata providers if available...");
-                    }
-                }
-                else
-                {
-                    if (video is Episode episodeWithMultipleSeasons && episodeWithMultipleSeasons.Season.IndexNumber > 1)
-                    {
-                        // user doesnt have full series; have to do season lookup
-                        logger.LogInformation($"(Tvdb) Anime {episodeWithMultipleSeasons.Name} found in anime XML file");
-                        return SeasonLookup(logger, seasonNumber, episodeNumber, related);
-                    }
-                    else
-                    {
-                        logger.LogInformation($"(Tvdb) Anime {video.Name} found in anime XML file");
-                        // is movie / only has one season / no related; just return the only result
-                        return (
-                            int.TryParse(first.MyAnimeListid, out MyAnimeListId) ? MyAnimeListId : null,
-                            int.TryParse(first.Episodeoffset, out var episodeOffset) ? episodeOffset : null
-                        );
-                    }
-                }
-            }
-
             return (null, null);
         }
 
