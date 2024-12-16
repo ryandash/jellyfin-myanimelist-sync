@@ -1,8 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading.Tasks;
 using jellyfin_ani_sync.Interfaces;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
@@ -12,11 +7,17 @@ using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace jellyfin_ani_sync;
 
-public class TaskProcessMarkedMedia {
-    private List<(Guid userId, Guid? seasonId, Video baseItem)> itemsToUpdate { get; set; } = new ();
+public class TaskProcessMarkedMedia
+{
+    private List<(Guid userId, Guid? seasonId, Video baseItem)> itemsToUpdate { get; set; } = new();
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<TaskProcessMarkedMedia> _logger;
     private readonly ILibraryManager _libraryManager;
@@ -28,7 +29,8 @@ public class TaskProcessMarkedMedia {
     private readonly IApplicationPaths _applicationPaths;
     private readonly IAsyncDelayer _delayer;
 
-    public TaskProcessMarkedMedia(ILoggerFactory loggerFactory, ILibraryManager libraryManager, IFileSystem fileSystem, IMemoryCache memoryCache, IHttpContextAccessor httpContextAccessor, IServerApplicationHost serverApplicationHost, IHttpClientFactory httpClientFactory, IApplicationPaths applicationPaths, IAsyncDelayer delayer) {
+    public TaskProcessMarkedMedia(ILoggerFactory loggerFactory, ILibraryManager libraryManager, IFileSystem fileSystem, IMemoryCache memoryCache, IHttpContextAccessor httpContextAccessor, IServerApplicationHost serverApplicationHost, IHttpClientFactory httpClientFactory, IApplicationPaths applicationPaths, IAsyncDelayer delayer)
+    {
         _loggerFactory = loggerFactory;
         _libraryManager = libraryManager;
         _fileSystem = fileSystem;
@@ -41,54 +43,69 @@ public class TaskProcessMarkedMedia {
         _delayer = delayer;
     }
 
-    public void AddToUpdateList((Guid userId, Guid? seasonId, Video baseItem) itemToAdd) {
-        lock (itemsToUpdate) {
+    public void AddToUpdateList((Guid userId, Guid? seasonId, Video baseItem) itemToAdd)
+    {
+        lock (itemsToUpdate)
+        {
             itemsToUpdate.Add(itemToAdd);
         }
     }
 
-    private void RemoveFromUpdateList((Guid userId, Guid? seasonId, Video baseItem) itemToRemove) {
-        lock (itemsToUpdate) {
-            itemsToUpdate.Remove(itemToRemove);
+    private void RemoveFromUpdateList((Guid userId, Guid? seasonId, Video baseItem) itemToRemove)
+    {
+        lock (itemsToUpdate)
+        {
+            _ = itemsToUpdate.Remove(itemToRemove);
         }
     }
 
-    public async Task RunUpdate() {
+    public async Task RunUpdate()
+    {
         // wait a second to let the list populate itself if a mass update is occuring
         await Task.Delay(1000);
-        
-        while (itemsToUpdate.Any()) {
+
+        while (itemsToUpdate.Any())
+        {
             var item = itemsToUpdate.FirstOrDefault();
-            if (item.Equals(default)) {
+            if (item.Equals(default))
+            {
                 RemoveFromUpdateList(item);
                 continue;
             };
-            
+
             var aniSyncConfigUser = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(uc => uc.UserId == item.userId);
             List<(Guid userId, Guid? seasonId, Video baseItem)> pairedItems = new List<(Guid userId, Guid? seasonId, Video baseItem)>();
-            if (aniSyncConfigUser != null && UpdateProviderStatus.LibraryCheck(aniSyncConfigUser, _libraryManager, _fileSystem, _logger, item.baseItem)) {
-                if (_memoryCache.TryGetValue("lastQuery", out DateTime lastQuery)) {
-                    if ((DateTime.UtcNow - lastQuery).TotalSeconds <= 5) {
+            if (aniSyncConfigUser != null && UpdateProviderStatus.LibraryCheck(aniSyncConfigUser, _libraryManager, _fileSystem, _logger, item.baseItem))
+            {
+                if (_memoryCache.TryGetValue("lastQuery", out DateTime lastQuery))
+                {
+                    if ((DateTime.UtcNow - lastQuery).TotalSeconds <= 5)
+                    {
                         await Task.Delay(5000);
                         _logger.LogInformation("Too many requests! Waiting 5 seconds...");
                     }
                 }
 
-                _memoryCache.Set("lastQuery", DateTime.UtcNow, new MemoryCacheEntryOptions {
+                _ = _memoryCache.Set("lastQuery", DateTime.UtcNow, new MemoryCacheEntryOptions
+                {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5)
                 });
-                
+
                 UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(_fileSystem, _libraryManager, _loggerFactory, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _memoryCache, _delayer);
                 pairedItems = itemsToUpdate.Where(items => items.seasonId == item.seasonId && items.userId == item.userId).ToList();
                 item = pairedItems.MaxBy(item => item.baseItem.IndexNumber);
                 await updateProviderStatus.Update(item.baseItem, item.userId, true);
             }
 
-            if (pairedItems.Count() > 1) {
-                foreach ((Guid userId, Guid? seasonId, Video baseItem) pairedItem in pairedItems) {
+            if (pairedItems.Count() > 1)
+            {
+                foreach ((Guid userId, Guid? seasonId, Video baseItem) pairedItem in pairedItems)
+                {
                     RemoveFromUpdateList(pairedItem);
                 }
-            } else {
+            }
+            else
+            {
                 RemoveFromUpdateList(item);
             }
         }

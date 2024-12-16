@@ -1,11 +1,4 @@
 #nullable enable
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using jellyfin_ani_sync.Configuration;
 using jellyfin_ani_sync.Helpers;
 using jellyfin_ani_sync.Interfaces;
@@ -15,9 +8,18 @@ using MediaBrowser.Controller;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 
-namespace jellyfin_ani_sync.Api {
-    public class AuthApiCall {
+namespace jellyfin_ani_sync.Api
+{
+    public class AuthApiCall
+    {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IServerApplicationHost _serverApplicationHost;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -35,7 +37,8 @@ namespace jellyfin_ani_sync.Api {
             ILoggerFactory loggerFactory,
             IMemoryCache memoryCache,
             IAsyncDelayer delayer,
-            UserConfig userConfig) {
+            UserConfig userConfig)
+        {
             _httpClientFactory = httpClientFactory;
             _serverApplicationHost = serverApplicationHost;
             _httpContextAccessor = httpContextAccessor;
@@ -56,11 +59,13 @@ namespace jellyfin_ani_sync.Api {
         /// <exception cref="NullReferenceException">Authentication details not found.</exception>
         /// <exception cref="Exception">Non-200 response.</exception>
         /// <exception cref="AuthenticationException">Could not authenticate with the API.</exception>
-        public async Task<HttpResponseMessage?> AuthenticatedApiCall(ApiName provider, CallType callType, string url, FormUrlEncodedContent formUrlEncodedContent = null, StringContent stringContent = null, Dictionary<string, string>? requestHeaders = null) {
+        public async Task<HttpResponseMessage?> AuthenticatedApiCall(ApiName provider, CallType callType, string url, FormUrlEncodedContent formUrlEncodedContent = null, StringContent stringContent = null, Dictionary<string, string>? requestHeaders = null)
+        {
             int attempts = 0;
             int timeoutSeconds = defaultTimeoutSeconds;
             UserApiAuth? auth = UserConfig.UserApiAuth?.FirstOrDefault(item => item.Name == provider);
-            if (auth == null) {
+            if (auth == null)
+            {
                 _logger.LogError("Could not find authentication details, please authenticate the plugin first");
                 return null;
             }
@@ -72,18 +77,23 @@ namespace jellyfin_ani_sync.Api {
                 _logger.LogDebug($"({provider}) Delaying API call to prevent 429 (too many requests)...");
                 await _delayer.Delay(DateTime.UtcNow.Subtract(lastCallDateTime));
             }
-            while (attempts < 3) {
-                if (requestHeaders != null) {
-                    foreach (KeyValuePair<string,string> requestHeader in requestHeaders) {
+            while (attempts < 3)
+            {
+                if (requestHeaders != null)
+                {
+                    foreach (KeyValuePair<string, string> requestHeader in requestHeaders)
+                    {
                         client.DefaultRequestHeaders.Add(requestHeader.Key, requestHeader.Value);
                     }
                 }
 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", auth.AccessToken);
                 HttpResponseMessage responseMessage = new HttpResponseMessage();
-                try {
-                    _memoryCache.Set(MemoryCacheHelper.GetLastCallDateTimeKey(provider), DateTime.UtcNow, TimeSpan.FromSeconds(5));
-                    switch (callType) {
+                try
+                {
+                    _ = _memoryCache.Set(MemoryCacheHelper.GetLastCallDateTimeKey(provider), DateTime.UtcNow, TimeSpan.FromSeconds(5));
+                    switch (callType)
+                    {
                         case CallType.GET:
                             responseMessage = await client.GetAsync(url);
                             break;
@@ -103,22 +113,30 @@ namespace jellyfin_ani_sync.Api {
                             responseMessage = await client.GetAsync(url);
                             break;
                     }
-                } catch (Exception e) {
+                }
+                catch (Exception e)
+                {
                     _logger.LogError(e.Message);
                 }
 
 
-                if (responseMessage.IsSuccessStatusCode) {
+                if (responseMessage.IsSuccessStatusCode)
+                {
                     return responseMessage;
-                } else {
+                }
+                else
+                {
                     switch (responseMessage.StatusCode)
                     {
                         case HttpStatusCode.Unauthorized:
                             // token has probably expired; try refreshing it
                             UserApiAuth newAuth;
-                            try {
-                                newAuth = new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache).GetToken(UserConfig.UserId, refreshToken: auth.RefreshToken);
-                            } catch (Exception e) {
+                            try
+                            {
+                                newAuth = new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory).GetToken(UserConfig.UserId, refreshToken: auth.RefreshToken);
+                            }
+                            catch (Exception e)
+                            {
                                 _logger.LogError($"Could not re-authenticate: {e.Message}, please manually re-authenticate the user via the AniSync configuration page");
                                 return null;
                             }
@@ -143,8 +161,9 @@ namespace jellyfin_ani_sync.Api {
             _logger.LogError("Unable to authenticate the API call, re-authenticate the plugin");
             return null;
         }
-        
-        public enum CallType {
+
+        public enum CallType
+        {
             GET,
             POST,
             PATCH,

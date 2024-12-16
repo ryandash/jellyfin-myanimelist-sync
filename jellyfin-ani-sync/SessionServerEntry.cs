@@ -13,9 +13,15 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace jellyfin_ani_sync {
-    public class SessionServerEntry : IHostedService {
+namespace jellyfin_ani_sync
+{
+    public class SessionServerEntry : IHostedService
+    {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IServerApplicationHost _serverApplicationHost;
         private readonly IHttpContextAccessor _httpContextAccessor;
@@ -33,7 +39,8 @@ namespace jellyfin_ani_sync {
         public SessionServerEntry(ISessionManager sessionManager, ILoggerFactory loggerFactory,
             IHttpClientFactory httpClientFactory, ILibraryManager libraryManager, IFileSystem fileSystem,
             IServerApplicationHost serverApplicationHost, IHttpContextAccessor httpContextAccessor,
-            IApplicationPaths applicationPaths, IMemoryCache memoryCache) {
+            IApplicationPaths applicationPaths, IMemoryCache memoryCache)
+        {
             _httpClientFactory = httpClientFactory;
             _serverApplicationHost = serverApplicationHost;
             _httpContextAccessor = httpContextAccessor;
@@ -47,23 +54,30 @@ namespace jellyfin_ani_sync {
             _delayer = new Delayer();
         }
 
-        public Task StartAsync(CancellationToken cancellationToken) {
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
             _sessionManager.PlaybackStopped += PlaybackStopped;
             return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken) {
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
             _sessionManager.PlaybackStopped -= PlaybackStopped;
             return Task.CompletedTask;
         }
 
-        public async void PlaybackStopped(object sender, PlaybackStopEventArgs e) {
-            try {
+        public async void PlaybackStopped(object sender, PlaybackStopEventArgs e)
+        {
+            try
+            {
                 UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(_fileSystem, _libraryManager, _loggerFactory, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _memoryCache, _delayer);
-                foreach (User user in e.Users) {
+                foreach (User user in e.Users)
+                {
                     await updateProviderStatus.Update(e.Item, user.Id, e.PlayedToCompletion);
                 }
-            } catch (Exception exception) {
+            }
+            catch (Exception exception)
+            {
                 _logger.LogError($"Fatal error occured during anime sync job: {exception}");
             }
         }

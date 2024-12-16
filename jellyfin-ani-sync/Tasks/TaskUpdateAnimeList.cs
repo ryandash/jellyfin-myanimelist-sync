@@ -1,14 +1,16 @@
+using MediaBrowser.Common.Configuration;
+using MediaBrowser.Model.Tasks;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using MediaBrowser.Common.Configuration;
-using MediaBrowser.Model.Tasks;
-using Microsoft.Extensions.Logging;
 
-namespace jellyfin_ani_sync {
-    public class TaskUpdateAnimeList : IScheduledTask {
+namespace jellyfin_ani_sync
+{
+    public class TaskUpdateAnimeList : IScheduledTask
+    {
         private readonly ILoggerFactory _loggerFactory;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly IApplicationPaths _applicationPaths;
@@ -19,17 +21,20 @@ namespace jellyfin_ani_sync {
         public string Category => "AniSync";
 
         public TaskUpdateAnimeList(ILoggerFactory loggerFactory, IHttpClientFactory httpClientFactory,
-            IApplicationPaths applicationPaths) {
+            IApplicationPaths applicationPaths)
+        {
             _loggerFactory = loggerFactory;
             _httpClientFactory = httpClientFactory;
             _applicationPaths = applicationPaths;
         }
 
 
-        public Task Execute(CancellationToken cancellationToken, IProgress<double> progress) {
-            return Task.Run(async () => {
+        public Task Execute(CancellationToken cancellationToken, IProgress<double> progress)
+        {
+            return Task.Run(async () =>
+            {
                 UpdateAnimeList updateAnimeList = new UpdateAnimeList(_httpClientFactory, _loggerFactory, _applicationPaths);
-                await updateAnimeList.Update();
+                _ = await updateAnimeList.Update();
             }, cancellationToken);
         }
 
@@ -42,10 +47,12 @@ namespace jellyfin_ani_sync {
             return new[] { trigger };
         }
 
-        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken) {
-            await Task.Run(async () => {
+        public async Task ExecuteAsync(IProgress<double> progress, CancellationToken cancellationToken)
+        {
+            await Task.Run(async () =>
+            {
                 UpdateAnimeList updateAnimeList = new UpdateAnimeList(_httpClientFactory, _loggerFactory, _applicationPaths);
-                await updateAnimeList.Update();
+                _ = await updateAnimeList.Update();
             }, cancellationToken);
         }
     }

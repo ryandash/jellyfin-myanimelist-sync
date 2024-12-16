@@ -8,7 +8,7 @@ public class PluginServiceRegistrator : IPluginServiceRegistrator
 {
     public void RegisterServices(IServiceCollection serviceCollection, IServerApplicationHost applicationHost)
     {
-        serviceCollection.AddHostedService<SessionServerEntry>();
-        serviceCollection.AddHostedService<UserDataServerEntry>();
+        _ = serviceCollection.AddHostedService<SessionServerEntry>();
+        _ = serviceCollection.AddHostedService<UserDataServerEntry>();
     }
 }

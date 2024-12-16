@@ -1,7 +1,4 @@
 #nullable enable
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
 using jellyfin_ani_sync.Interfaces;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
@@ -14,9 +11,14 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
-namespace jellyfin_ani_sync {
-    public class UserDataServerEntry : IHostedService {
+namespace jellyfin_ani_sync
+{
+    public class UserDataServerEntry : IHostedService
+    {
         private readonly IUserDataManager _userDataManager;
         private readonly IFileSystem _fileSystem;
         private readonly ILibraryManager _libraryManager;
@@ -37,11 +39,12 @@ namespace jellyfin_ani_sync {
             IServerApplicationHost serverApplicationHost,
             IHttpClientFactory httpClientFactory,
             IMemoryCache memoryCache,
-            IApplicationPaths applicationPaths) {
+            IApplicationPaths applicationPaths)
+        {
             _userDataManager = userDataManager;
             _fileSystem = fileSystem;
             _libraryManager = libraryManager;
-            loggerFactory.CreateLogger<UpdateProviderStatus>();
+            _ = loggerFactory.CreateLogger<UpdateProviderStatus>();
             _httpContextAccessor = httpContextAccessor;
             _serverApplicationHost = serverApplicationHost;
             _httpClientFactory = httpClientFactory;
@@ -51,23 +54,28 @@ namespace jellyfin_ani_sync {
             _taskProcessMarkedMedia = new TaskProcessMarkedMedia(loggerFactory, _libraryManager, _fileSystem, _memoryCache, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _delayer);
         }
 
-        public Task StartAsync(CancellationToken cancellationToken) {
+        public Task StartAsync(CancellationToken cancellationToken)
+        {
             _userDataManager.UserDataSaved += UserDataManagerOnUserDataSaved;
             return Task.CompletedTask;
         }
 
-        public Task StopAsync(CancellationToken cancellationToken) {
+        public Task StopAsync(CancellationToken cancellationToken)
+        {
             _userDataManager.UserDataSaved -= UserDataManagerOnUserDataSaved;
             return Task.CompletedTask;
         }
 
-        private void UserDataManagerOnUserDataSaved(object? sender, UserDataSaveEventArgs e) {
-            if (e.SaveReason == UserDataSaveReason.TogglePlayed && Plugin.Instance?.PluginConfiguration.watchedTickboxUpdatesProvider == true) {
+        private void UserDataManagerOnUserDataSaved(object? sender, UserDataSaveEventArgs e)
+        {
+            if (e.SaveReason == UserDataSaveReason.TogglePlayed && Plugin.Instance?.PluginConfiguration.watchedTickboxUpdatesProvider == true)
+            {
                 if (!e.UserData.Played || e.Item is not Video) return;
                 // asynchronous call so it doesn't prevent the UI marking the media as watched
                 Episode? episode = e.Item as Episode;
                 _taskProcessMarkedMedia.AddToUpdateList((e.UserId, episode?.Season.Id, e.Item as Video));
-                if (_updateTask == null || _updateTask.IsCompleted) {
+                if (_updateTask == null || _updateTask.IsCompleted)
+                {
                     _updateTask = _taskProcessMarkedMedia.RunUpdate();
                 }
             }

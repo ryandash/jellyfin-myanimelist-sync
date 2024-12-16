@@ -16,6 +16,12 @@ using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http;
+using System.Threading;
+using System.Threading.Tasks;
 
 namespace jellyfin_ani_sync;
 
@@ -40,36 +46,49 @@ public class SyncProviderFromLocal (
         await GetSeasonDetails(userSeriesList);
     }
 
-    private async Task GetSeasonDetails(List<Series> userSeriesList) {
+    private async Task GetSeasonDetails(List<Series> userSeriesList)
+    {
         _logger.LogInformation($"(Sync) Starting sync to provider from local process");
         UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(fileSystem, libraryManager, loggerFactory, _httpContextAccessor, _serverApplicationHost, httpClientFactory, applicationPaths, memoryCache, delayer);
 
-        foreach (Series series in userSeriesList) {
+        foreach (Series series in userSeriesList)
+        {
             _logger.LogInformation($"(Sync) Retrieved {series.Name}'s seasons latest watched episode and when it was watched...");
             var toMarkAsCompleted = GetMaxEpisodeAndCompletedTime(series);
-            if (toMarkAsCompleted != null) {
-                foreach (Episode episodeDateTime in toMarkAsCompleted) {
-                    if (episodeDateTime != null) {
-                        try {
+            if (toMarkAsCompleted != null)
+            {
+                foreach (Episode episodeDateTime in toMarkAsCompleted)
+                {
+                    if (episodeDateTime != null)
+                    {
+                        try
+                        {
                             await updateProviderStatus.Update(episodeDateTime, _userId, true);
-                        } catch (Exception e) {
+                        }
+                        catch (Exception e)
+                        {
                             _logger.LogError($"(Sync) Could not sync item; error: {e.Message}");
                             continue;
                         }
 
                         _logger.LogInformation("(Sync) Waiting 2 seconds before continuing...");
                         Thread.Sleep(2000);
-                    } else {
+                    }
+                    else
+                    {
                         _logger.LogError("(Sync) Could not get users Jellyfin data for this season");
                     }
                 }
-            } else {
+            }
+            else
+            {
                 _logger.LogError($"(Sync) User with ID of {_userId} not found");
             }
         }
     }
 
-    private List<Episode> GetMaxEpisodeAndCompletedTime(Series series) {
+    private List<Episode> GetMaxEpisodeAndCompletedTime(Series series)
+    {
         List<Episode> returnDictionary = new List<Episode>();
 
         _logger.LogInformation($"(Sync) Getting {series.Name} seasons latest watched episode");
@@ -77,9 +96,11 @@ public class SyncProviderFromLocal (
         _logger.LogInformation($"(Sync) Series {series.Name} contains {seasons.Count} seasons");
         User user = userManager.GetUserById(_userId);
         if (user == null) return null;
-        foreach (Season season in seasons) {
+        foreach (Season season in seasons)
+        {
             _logger.LogInformation($"(Sync) Getting user data for {season.Name} of {series.Name}...");
-            if (season.IndexNumber == null) {
+            if (season.IndexNumber == null)
+            {
                 _logger.LogError($"(Sync) Season index number is null. Skipping...");
                 continue;
             }

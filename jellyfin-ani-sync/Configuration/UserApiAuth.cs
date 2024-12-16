@@ -1,22 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace jellyfin_ani_sync.Configuration {
-    public enum ApiName {
+namespace jellyfin_ani_sync.Configuration
+{
+    public enum ApiName
+    {
         [Display(Name = "MyAnimeList")]
-        Mal,
-        [Display(Name = "AniList")]
-        AniList,
-        [Display(Name = "Kitsu")]
-        Kitsu,
-        [Display(Name = "Annict")]
-        Annict,
-        [Display(Name = "Shikimori")]
-        Shikimori,
-        [Display(Name = "Simkl")]
-        Simkl
+        Mal
     }
 
-    public class UserApiAuth {
+    public class UserApiAuth
+    {
         /// <summary>
         /// Name of the API provider.
         /// </summary>
