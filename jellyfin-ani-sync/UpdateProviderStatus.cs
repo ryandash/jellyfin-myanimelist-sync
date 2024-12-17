@@ -107,7 +107,7 @@ namespace jellyfin_ani_sync
                     return;
                 }
                 int? myAnimeListId = int.Parse(_animeType == typeof(Episode)
-                        ? episode.Season.ProviderIds.ContainsKey("MyAnimeList") ? episode.Season.ProviderIds["MyAnimeList"] : episode.Series.ProviderIds["MyAnimeList"]
+                        ? episode.Series.ProviderIds["MyAnimeList"]
                         : movie.ProviderIds["MyAnimeList"]);
 
                 foreach (UserApiAuth userApiAuth in _userConfig.UserApiAuth)
