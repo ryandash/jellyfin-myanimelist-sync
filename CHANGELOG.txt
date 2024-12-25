@@ -1,0 +1,3 @@
+64fb8d9 Fix generated manifest changelog and sourceURL
+
+- Fix copy paste mistake with workflow url links
