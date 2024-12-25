@@ -41,8 +41,8 @@ jobs:
       - name: Extract Version and ABI from csproj
         id: extract_version_abi
         run: |
-          VERSION=$(grep -oPm1 "(?<=<Version>)(.*)(?=</Version>)" main_repo/**/*.csproj)
-          TARGET_ABI=$(grep -oPm1 "(?<=<PackageReference Include=\"Jellyfin.Controller\" Version=\")(.*)(?=\")" main_repo/**/*.csproj)
+          VERSION=$(grep -oPm1 "(?<=<Version>)(.*)(?=</Version>)" main_repo/**/*.csproj | sed 's/^[^:]*://')
+          TARGET_ABI=$(grep -oPm1 "(?<=<PackageReference Include=\"Jellyfin.Controller\" Version=\")(.*)(?=\")" main_repo/**/*.csproj | sed 's/^[^:]*://')
           echo "VERSION=${VERSION}" >> $GITHUB_ENV
           echo "TARGET_ABI=${TARGET_ABI}" >> $GITHUB_ENV
 
