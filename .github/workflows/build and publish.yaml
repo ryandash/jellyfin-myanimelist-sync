@@ -101,7 +101,7 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "Update manifest"
-          branch: main
+          branch: master
           file_pattern: 'manifest.json CHANGELOG.txt'
           repository: main_repo
           commit_user_name: "GitHub Actions Bot"
