@@ -93,7 +93,7 @@ public class Sync
     /// <returns>Users' provider anime list.</returns>
     private async Task<List<Anime>> GetAnimeList(string userId)
     {
-        ApiCallHelpers apiCallHelpers = new ApiCallHelpers();
+        ApiCallHelpers apiCallHelpers = new ApiCallHelpers(null);
         MalApiCalls.User user = new MalApiCalls.User();
         switch (_apiName)
         {

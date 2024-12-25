@@ -16,7 +16,7 @@ namespace jellyfin_ani_sync.Api
 {
     public class ApiAuthentication
     {
-        private ApiName _provider;
+        private readonly ApiName _provider;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ApiAuthentication> _logger;
         private readonly string _authApiUrl;

@@ -16,12 +16,12 @@ namespace jellyfin_ani_sync.Helpers
         /// This class combines different APIs into a single form.
         /// </summary>
         /// <param name="malApiCalls"></param>
-        public ApiCallHelpers(MalApiCalls malApiCalls = null)
+        public ApiCallHelpers(MalApiCalls malApiCalls)
         {
             _malApiCalls = malApiCalls;
         }
 
-        public async Task<List<Anime>> SearchAnime(string query)
+        public async Task<List<Anime>?> SearchAnime(string query)
         {
             bool updateNsfw = Plugin.Instance?.PluginConfiguration?.updateNsfw != null && Plugin.Instance.PluginConfiguration.updateNsfw;
             if (_malApiCalls != null)
@@ -32,7 +32,7 @@ namespace jellyfin_ani_sync.Helpers
             return null;
         }
 
-        public async Task<Anime> GetAnime(int id, string? alternativeId = null, bool getRelated = false)
+        public async Task<Anime?> GetAnime(int id, string? alternativeId = null, bool getRelated = false)
         {
             if (_malApiCalls != null)
             {
@@ -42,14 +42,8 @@ namespace jellyfin_ani_sync.Helpers
             return null;
         }
 
-        public async Task<Anime> GetAnime(AnimeOfflineDatabaseHelpers.OfflineDatabaseResponse ids, string title, bool getRelated = false)
-        {
-            // Simkl functionality has been removed, so this method no longer processes Simkl-specific logic.
-            return null;
-        }
-
-        public async Task<UpdateAnimeStatusResponse> UpdateAnime(int animeId, int numberOfWatchedEpisodes, Status status,
-            bool? isRewatching = null, int? numberOfTimesRewatched = null, DateTime? startDate = null, DateTime? endDate = null, string alternativeId = null, AnimeOfflineDatabaseHelpers.OfflineDatabaseResponse ids = null, bool? isShow = null)
+        public async Task<UpdateAnimeStatusResponse?> UpdateAnime(int animeId, int numberOfWatchedEpisodes, Status status,
+            bool? isRewatching = null, int? numberOfTimesRewatched = null, DateTime? startDate = null, DateTime? endDate = null, string? alternativeId = null, AnimeOfflineDatabaseHelpers.OfflineDatabaseResponse? ids = null, bool? isShow = null)
         {
             if (_malApiCalls != null)
             {
@@ -59,7 +53,7 @@ namespace jellyfin_ani_sync.Helpers
             return null;
         }
 
-        public async Task<MalApiCalls.User> GetUser()
+        public async Task<MalApiCalls.User?> GetUser()
         {
             if (_malApiCalls != null)
             {
@@ -69,7 +63,7 @@ namespace jellyfin_ani_sync.Helpers
             return null;
         }
 
-        public async Task<List<Anime>> GetAnimeList(Status status, int? userId = null)
+        public async Task<List<Anime>?> GetAnimeList(Status status, int? userId = null)
         {
             if (_malApiCalls != null)
             {

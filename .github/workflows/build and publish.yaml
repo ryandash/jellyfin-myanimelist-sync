@@ -1,0 +1,110 @@
+on:
+  workflow_dispatch:
+    inputs:
+      dotnet-version:
+        required: false
+        default: "8.0.x"
+        description: "The .NET version to setup for the build"
+        type: string
+      dotnet-target:
+        required: false
+        default: "net8.0"
+        description: "The .NET target framework to build the projects with"
+        type: string
+permissions:
+  contents: write
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Main Repository
+        uses: actions/checkout@v4
+        with:
+          path: main_repo
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "${{ inputs.dotnet-version }}"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ inputs.dotnet-version }}-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-${{ inputs.dotnet-version }}-
+
+      - name: Restore Dependencies and Build Main Repo
+        run: dotnet build main_repo --configuration Release --framework ${{ inputs.dotnet-target }}
+
+      - name: Extract Version and ABI from csproj
+        id: extract_version_abi
+        run: |
+          VERSION=$(grep -oPm1 "(?<=<Version>)(.*)(?=</Version>)" main_repo/**/*.csproj)
+          TARGET_ABI=$(grep -oPm1 "(?<=<PackageReference Include=\"Jellyfin.Controller\" Version=\")(.*)(?=\")" main_repo/**/*.csproj)
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TARGET_ABI=${TARGET_ABI}" >> $GITHUB_ENV
+
+      - name: Generate ZIP for DLLs
+        run: |
+          find main_repo -path '*/bin/Release/*.dll' -exec zip -j myanimelist_${{ env.VERSION }}.zip {} +
+
+      - name: Generate MD5 Checksum for ZIP
+        id: checksum
+        run: |
+          CHECKSUM=$(md5sum myanimelist_${{ env.VERSION }}.zip | awk '{ print $1 }')
+          echo "CHECKSUM=${CHECKSUM}" >> $GITHUB_ENV
+
+      - name: Update Manifest File
+        run: |
+          TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          jq --arg version "${{ env.VERSION }}" \
+             --arg changelog "https://github.com/ryandash/jellyfin-plugin-myanimelist/releases/tag/v${{ env.VERSION }}" \
+             --arg checksum "${{ env.CHECKSUM }}" \
+             --arg sourceUrl "https://github.com/ryandash/jellyfin-plugin-myanimelist/releases/download/v${{ env.VERSION }}/myanimelist_${{ env.VERSION }}.zip" \
+             --arg targetAbi "${{ env.TARGET_ABI }}" \
+             --arg timestamp "$TIMESTAMP" \
+             '.[0].versions = [{
+                changelog: $changelog,
+                checksum: $checksum,
+                sourceUrl: $sourceUrl,
+                targetAbi: $targetAbi,
+                timestamp: $timestamp,
+                version: $version
+              }] + .[0].versions' main_repo/manifest.json > main_repo/manifest-updated.json
+
+          mv main_repo/manifest-updated.json main_repo/manifest.json
+
+      - name: Get Changelog
+        id: changelog
+        run: |
+          cd main_repo
+          git fetch --tags
+          LAST_TAG=$(git tag -l | sort -V | tail -n 1)
+          git log ${LAST_TAG}..HEAD --pretty=format:"%h %B" --no-merges > CHANGELOG.txt
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: v${{ env.VERSION }}
+          name: "Version ${{ env.VERSION }}"
+          body: ${{ env.CHANGELOG }}
+          draft: false
+          prerelease: false
+          artifacts: "myanimelist_${{ env.VERSION }}.zip"
+          artifactContentType: "application/zip"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Commit Manifest to Main
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "Update manifest"
+          branch: main
+          file_pattern: 'manifest.json CHANGELOG.txt'
+          repository: main_repo
+          commit_user_name: "GitHub Actions Bot"
+          commit_user_email: "41898282+github-actions[bot]@users.noreply.github.com"
+          commit_author: "ryandash <ryandash@users.noreply.github.com>"
+          skip_dirty_check: true

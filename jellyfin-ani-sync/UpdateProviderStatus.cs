@@ -6,7 +6,6 @@ using jellyfin_ani_sync.Interfaces;
 using jellyfin_ani_sync.Models;
 using jellyfin_ani_sync.Models.Mal;
 using MediaBrowser.Common.Configuration;
-using MediaBrowser.Common.Net;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.Movies;
@@ -21,14 +20,13 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using static jellyfin_ani_sync.Helpers.AnimeListHelpers;
 
 namespace jellyfin_ani_sync
 {
     public class UpdateProviderStatus
     {
         private readonly IHttpClientFactory _httpClientFactory;
-        private readonly IApplicationPaths _applicationPaths;
+        private readonly IApplicationPaths? _applicationPaths;
         private readonly IServerApplicationHost _serverApplicationHost;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IMemoryCache _memoryCache;
@@ -38,9 +36,9 @@ namespace jellyfin_ani_sync
 
         internal IApiCallHelpers ApiCallHelpers;
         private UserConfig? _userConfig;
-        private Type _animeType;
+        private Type? _animeType;
         private readonly ILibraryManager _libraryManager;
-        private readonly IFileSystem _fileSystem;
+        private readonly IFileSystem? _fileSystem;
 
         internal ApiName ApiName;
         private readonly ILoggerFactory _loggerFactory;
@@ -69,11 +67,11 @@ namespace jellyfin_ani_sync
         }
 
 
-        public async Task Update(BaseItem e, Guid userId, bool playedToCompletion)
+        public async Task Update(BaseItem e, Guid? userId, bool playedToCompletion)
         {
             var video = e as Video;
-            Episode episode = video as Episode;
-            Movie movie = video as Movie;
+            Episode? episode = video as Episode;
+            Movie? movie = video as Movie;
             if (video is Episode)
             {
                 _animeType = typeof(Episode);
@@ -107,7 +105,7 @@ namespace jellyfin_ani_sync
                     return;
                 }
                 int? myAnimeListId = int.Parse(_animeType == typeof(Episode)
-                        ? episode.Series.ProviderIds["MyAnimeList"]
+                        ? episode.Season.ProviderIds["MyAnimeList"]
                         : movie.ProviderIds["MyAnimeList"]);
 
                 foreach (UserApiAuth userApiAuth in _userConfig.UserApiAuth)
@@ -130,26 +128,13 @@ namespace jellyfin_ani_sync
                             break;
                     }
 
-                    Anime matchingAnime = (await ApiCallHelpers.GetAnime(myAnimeListId.Value));
+                    Anime? matchingAnime = (await ApiCallHelpers.GetAnime(myAnimeListId.Value));
                     _logger.LogInformation($"({ApiName}) Found matching {_animeType}: {GetAnimeTitle(matchingAnime)}");
                     if (_animeType == typeof(Episode))
                     {
                         int episodeNumber = episode.IndexNumber.Value;
 
-                        // should have already found the appropriate series/season/movie, no need to do other checks
-                        if (episode?.Season.IndexNumber is > 1)
-                        {
-                            // if this is not the first season, then we need to lookup the related season.
-                            matchingAnime = await GetDifferentSeasonAnime(matchingAnime.Id, episode.Season.IndexNumber.Value, alternativeId: matchingAnime.AlternativeId);
-                            if (matchingAnime == null)
-                            {
-                                _logger.LogWarning($"({ApiName}) Could not find next season");
-                                break;
-                            }
-
-                            _logger.LogInformation($"({ApiName}) Season being watched is {GetAnimeTitle(matchingAnime)}");
-                        }
-                        else if (episode?.Season.IndexNumber == 0)
+                        if (episode?.Season.IndexNumber == 0)
                         {
                             // the episode is an ova or special
                             matchingAnime = await GetOva(matchingAnime.Id, episode.Name, alternativeId: matchingAnime.AlternativeId);
@@ -167,7 +152,7 @@ namespace jellyfin_ani_sync
                             int totalEpisodesWatched = 0;
                             int seasonCounter = episode.Season.IndexNumber.Value;
                             int episodeCount = episode.IndexNumber.Value;
-                            Anime season = matchingAnime;
+                            Anime? season = matchingAnime;
                             bool isRootSeason = false;
                             while (seasonEpisodeCounter < episodeCount)
                             {
@@ -259,7 +244,7 @@ namespace jellyfin_ani_sync
         /// <param name="first">The first string.</param>
         /// <param name="second">The second string.</param>
         /// <returns>True if first string is equal to second string, false if not.</returns>
-        private bool CompareStrings(string first, string second)
+        private bool CompareStrings(string? first, string? second)
         {
             return String.Compare(first, second, CultureInfo.CurrentCulture, CompareOptions.IgnoreCase | CompareOptions.IgnoreSymbols) == 0;
         }
@@ -270,7 +255,7 @@ namespace jellyfin_ani_sync
         /// <param name="first">The first string.</param>
         /// <param name="second">The second string.</param>
         /// <returns>True if first string contains second string, false if not.</returns>
-        private bool ContainsExtended(string first, string second)
+        private bool ContainsExtended(string? first, string? second)
         {
             return StringFormatter.RemoveSpecialCharacters(first).Contains(StringFormatter.RemoveSpecialCharacters(second), StringComparison.OrdinalIgnoreCase);
         }
@@ -284,7 +269,7 @@ namespace jellyfin_ani_sync
         /// <param name="logger">Logger instance.</param>
         /// <param name="item">Item to check location of.</param>
         /// <returns></returns>
-        public static bool LibraryCheck(UserConfig userConfig, ILibraryManager libraryManager, IFileSystem fileSystem, ILogger logger, BaseItem item)
+        public static bool LibraryCheck(UserConfig userConfig, ILibraryManager libraryManager, IFileSystem? fileSystem, ILogger logger, BaseItem item)
         {
             try
             {
@@ -318,14 +303,14 @@ namespace jellyfin_ani_sync
             }
         }
 
-        private async Task CheckUserListAnimeStatus(int matchingAnimeId, int episodeNumber, bool? overrideCheckRewatch = null, string? alternativeId = null)
+        private async Task CheckUserListAnimeStatus(int matchingAnimeId, int? episodeNumber, bool? overrideCheckRewatch = null, string? alternativeId = null)
         {
-            Anime detectedAnime = await GetAnime(matchingAnimeId, alternativeId: alternativeId);
+            Anime? detectedAnime = await GetAnime(matchingAnimeId, alternativeId: alternativeId);
 
             await CheckUserListAnimeStatusBase(detectedAnime, episodeNumber, overrideCheckRewatch, alternativeId);
         }
 
-        private async Task CheckUserListAnimeStatusBase(Anime detectedAnime, int episodeNumber, bool? overrideCheckRewatch = null, string? alternativeId = null)
+        private async Task CheckUserListAnimeStatusBase(Anime? detectedAnime, int? episodeNumber, bool? overrideCheckRewatch = null, string? alternativeId = null)
         {
             if (detectedAnime == null) return;
             if (detectedAnime.MyListStatus != null && detectedAnime.MyListStatus.Status == Status.Watching)
@@ -387,7 +372,7 @@ namespace jellyfin_ani_sync
             await UpdateAnimeStatus(detectedAnime, episodeNumber);
         }
 
-        private async Task<bool> CheckIfRewatchCompleted(Anime detectedAnime, int indexNumber, bool? overrideCheckRewatch)
+        private async Task<bool> CheckIfRewatchCompleted(Anime detectedAnime, int? indexNumber, bool? overrideCheckRewatch)
         {
             if (overrideCheckRewatch == null ||
                 overrideCheckRewatch.Value ||
@@ -429,21 +414,9 @@ namespace jellyfin_ani_sync
         /// <param name="animeId">ID of the anime you want to get.</param>
         /// <param name="status">User status of the show.</param>
         /// <returns>Single anime result.</returns>
-        private async Task<Anime> GetAnime(int animeId, Status? status = null, string? alternativeId = null)
+        private async Task<Anime?> GetAnime(int animeId, Status? status = null, string? alternativeId = null)
         {
-            Anime anime = await ApiCallHelpers.GetAnime(animeId, alternativeId: alternativeId);
-
-            if (anime != null && ((status != null && anime.MyListStatus != null && anime.MyListStatus.Status == status) || status == null))
-            {
-                return anime;
-            }
-
-            return null;
-        }
-
-        private async Task<Anime> GetAnime(AnimeOfflineDatabaseHelpers.OfflineDatabaseResponse animeIds, string title, Status? status = null, string? alternativeId = null)
-        {
-            Anime anime = await ApiCallHelpers.GetAnime(animeIds, title);
+            Anime? anime = await ApiCallHelpers.GetAnime(animeId, alternativeId: alternativeId);
 
             if (anime != null && ((status != null && anime.MyListStatus != null && anime.MyListStatus.Status == status) || status == null))
             {
@@ -459,11 +432,11 @@ namespace jellyfin_ani_sync
         /// <param name="detectedAnime">The anime search result to update.</param>
         /// <param name="episodeNumber">The episode number to update the anime to.</param>
         /// <param name="setRewatching">Whether to set the show as being re-watched or not.</param>
-        internal async Task UpdateAnimeStatus(Anime detectedAnime, int? episodeNumber, bool? setRewatching = null, int? rewatchCount = null, bool firstTimeRewatch = false)
+        internal async Task UpdateAnimeStatus(Anime detectedAnime, int? episodeNumber, bool? setRewatching = null, int? rewatchCount = null, bool? firstTimeRewatch = false)
         {
             if (episodeNumber != null)
             {
-                UpdateAnimeStatusResponse response;
+                UpdateAnimeStatusResponse? response;
                 if (detectedAnime.MyListStatus != null)
                 {
                     if (detectedAnime.MyListStatus.NumEpisodesWatched < episodeNumber.Value || detectedAnime.NumEpisodes == 1 ||
@@ -631,10 +604,10 @@ namespace jellyfin_ani_sync
         /// <param name="animeId">ID of the anime to get the different season of.</param>
         /// <param name="seasonNumber">Index of the season to get.</param>
         /// <returns>The different seasons anime or null if unable to retrieve the relations.</returns>
-        internal async Task<Anime?> GetDifferentSeasonAnime(int animeId, int seasonNumber, string? alternativeId = null)
+        internal async Task<Anime?> GetDifferentSeasonAnime(int animeId, int? seasonNumber, string? alternativeId = null)
         {
             _logger.LogInformation($"({ApiName}) Attempting to get season 1...");
-            Anime retrievedSeason = await ApiCallHelpers.GetAnime(animeId, getRelated: true, alternativeId: alternativeId);
+            Anime? retrievedSeason = await ApiCallHelpers.GetAnime(animeId, getRelated: true, alternativeId: alternativeId);
 
             if (retrievedSeason != null)
             {
@@ -645,7 +618,7 @@ namespace jellyfin_ani_sync
                     if (initialSeasonRelatedAnime != null)
                     {
                         _logger.LogInformation($"({ApiName}) Attempting to get season {i + 1}...");
-                        Anime nextSeason = await ApiCallHelpers.GetAnime(initialSeasonRelatedAnime.Anime.Id, getRelated: true, alternativeId: initialSeasonRelatedAnime.Anime.AlternativeId);
+                        Anime? nextSeason = await ApiCallHelpers.GetAnime(initialSeasonRelatedAnime.Anime.Id, getRelated: true, alternativeId: initialSeasonRelatedAnime.Anime.AlternativeId);
 
                         if (nextSeason != null)
                         {
@@ -667,9 +640,9 @@ namespace jellyfin_ani_sync
             return null;
         }
 
-        private async Task<Anime> GetOva(int animeId, string episodeName, string? alternativeId = null)
+        private async Task<Anime?> GetOva(int animeId, string? episodeName, string? alternativeId = null)
         {
-            Anime anime = await ApiCallHelpers.GetAnime(animeId, getRelated: true, alternativeId: alternativeId);
+            Anime? anime = await ApiCallHelpers.GetAnime(animeId, getRelated: true, alternativeId: alternativeId);
 
             if (anime != null)
             {

@@ -22,45 +22,40 @@ namespace jellyfin_ani_sync.Api
 {
     public class MalApiCalls
     {
-        private readonly ILogger<MalApiCalls> _logger;
+        private readonly ILogger<MalApiCalls?> _logger;
         private readonly AuthApiCall _authApiCall;
-        private readonly string _refreshTokenUrl = "https://myanimelist.net/v1/oauth2/token";
         private readonly string _apiBaseUrl = "https://api.myanimelist.net/";
         private readonly int _apiVersion = 2;
 
         private string ApiUrl => _apiBaseUrl + "v" + _apiVersion;
 
-        public MalApiCalls(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IServerApplicationHost serverApplicationHost, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache, IAsyncDelayer delayer, UserConfig userConfig = null)
+        public MalApiCalls(IHttpClientFactory httpClientFactory, ILoggerFactory loggerFactory, IServerApplicationHost serverApplicationHost, IHttpContextAccessor httpContextAccessor, IMemoryCache memoryCache, IAsyncDelayer delayer, UserConfig userConfig)
         {
-            _logger = loggerFactory.CreateLogger<MalApiCalls>();
+            _logger = loggerFactory.CreateLogger<MalApiCalls?>();
             _authApiCall = new AuthApiCall(httpClientFactory, serverApplicationHost, httpContextAccessor, loggerFactory, memoryCache, delayer, userConfig: userConfig);
         }
 
         public class User
         {
             [JsonPropertyName("id")] public int Id { get; set; }
-            [JsonPropertyName("name")] public string Name { get; set; }
-            [JsonPropertyName("location")] public string Location { get; set; }
-            [JsonPropertyName("joined_at")] public DateTime JoinedAt { get; set; }
-            [JsonPropertyName("picture")] public string Picture { get; set; }
         }
 
         /// <summary>
         /// Get a users information.
         /// </summary>
-        public async Task<User> GetUserInformation()
+        public async Task<User?> GetUserInformation()
         {
-            UrlBuilder url = new UrlBuilder
+            UrlBuilder? url = new UrlBuilder
             {
                 Base = $"{ApiUrl}/users/@me"
             };
             var apiCall = await _authApiCall.AuthenticatedApiCall(ApiName.Mal, AuthApiCall.CallType.GET, url.Build());
             if (apiCall != null)
             {
-                StreamReader streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
+                StreamReader? streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
                 string streamText = await streamReader.ReadToEndAsync();
 
-                return JsonSerializer.Deserialize<User>(streamText);
+                return JsonSerializer.Deserialize<User?>(streamText);
             }
             else
             {
@@ -74,9 +69,9 @@ namespace jellyfin_ani_sync.Api
         /// <param name="query">Search by title.</param>
         /// <param name="fields">The fields you would like returned.</param>
         /// <returns>List of anime.</returns>
-        public async Task<List<Anime>> SearchAnime(string? query, string[]? fields, bool updateNsfw = false)
+        public async Task<List<Anime>?> SearchAnime(string? query, string[]? fields, bool updateNsfw = false)
         {
-            UrlBuilder url = new UrlBuilder
+            UrlBuilder? url = new UrlBuilder
             {
                 Base = $"{ApiUrl}/anime"
             };
@@ -89,16 +84,16 @@ namespace jellyfin_ani_sync.Api
                     query = query.Substring(0, 64);
                 }
 
-                url.Parameters.Add(new KeyValuePair<string, string>("q", query));
+                url.Parameters.Add(new KeyValuePair<string?, string>("q", query));
                 if (updateNsfw)
                 {
-                    url.Parameters.Add(new KeyValuePair<string, string>("nsfw", "true"));
+                    url.Parameters.Add(new KeyValuePair<string?, string>("nsfw", "true"));
                 }
             }
 
             if (fields != null)
             {
-                url.Parameters.Add(new KeyValuePair<string, string>("fields", String.Join(",", fields)));
+                url.Parameters.Add(new KeyValuePair<string?, string>("fields", String.Join(",", fields)));
             }
 
             string builtUrl = url.Build();
@@ -106,8 +101,8 @@ namespace jellyfin_ani_sync.Api
             var apiCall = await _authApiCall.AuthenticatedApiCall(ApiName.Mal, AuthApiCall.CallType.GET, builtUrl);
             if (apiCall != null)
             {
-                StreamReader streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
-                var animeList = JsonSerializer.Deserialize<SearchAnimeResponse>(await streamReader.ReadToEndAsync());
+                StreamReader? streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
+                var animeList = JsonSerializer.Deserialize<SearchAnimeResponse?>(await streamReader.ReadToEndAsync());
 
                 _logger.LogInformation("Search complete");
                 return animeList.Data.Select(list => list.Anime).ToList();
@@ -122,16 +117,16 @@ namespace jellyfin_ani_sync.Api
         /// Get an anime from the MAL database.
         /// </summary>
         /// <returns></returns>
-        public async Task<Anime> GetAnime(int animeId, string[]? fields = null)
+        public async Task<Anime?> GetAnime(int animeId, string[]? fields = null)
         {
-            UrlBuilder url = new UrlBuilder
+            UrlBuilder? url = new UrlBuilder
             {
                 Base = $"{ApiUrl}/anime/{animeId}"
             };
 
             if (fields != null)
             {
-                url.Parameters.Add(new KeyValuePair<string, string>("fields", String.Join(",", fields)));
+                url.Parameters.Add(new KeyValuePair<string?, string>("fields", String.Join(",", fields)));
             }
 
             string builtUrl = url.Build();
@@ -141,10 +136,10 @@ namespace jellyfin_ani_sync.Api
                 var apiCall = await _authApiCall.AuthenticatedApiCall(ApiName.Mal, AuthApiCall.CallType.GET, builtUrl);
                 if (apiCall != null)
                 {
-                    StreamReader streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
+                    StreamReader? streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
                     var options = new JsonSerializerOptions();
                     options.Converters.Add(new JsonStringEnumConverter());
-                    var anime = JsonSerializer.Deserialize<Anime>(await streamReader.ReadToEndAsync(), options);
+                    var anime = JsonSerializer.Deserialize<Anime?>(await streamReader.ReadToEndAsync(), options);
                     _logger.LogInformation("Anime retrieval complete");
                     return anime;
                 }
@@ -169,37 +164,37 @@ namespace jellyfin_ani_sync.Api
             Anime_id
         }
 
-        public async Task<List<UserAnimeListData>> GetUserAnimeList(Status? status = null, Sort? sort = null, int? idSearch = null)
+        public async Task<List<UserAnimeListData>?> GetUserAnimeList(Status? status = null, Sort? sort = null, int? idSearch = null)
         {
-            UrlBuilder url = new UrlBuilder
+            UrlBuilder? url = new UrlBuilder
             {
                 Base = $"{ApiUrl}/users/@me/animelist"
             };
 
-            url.Parameters.Add(new KeyValuePair<string, string>("fields", "list_status,num_episodes"));
+            url.Parameters.Add(new KeyValuePair<string?, string>("fields", "list_status,num_episodes"));
 
             if (status != null)
             {
-                url.Parameters.Add(new KeyValuePair<string, string>("status", status.Value.ToString().ToLower()));
+                url.Parameters.Add(new KeyValuePair<string?, string>("status", status.Value.ToString().ToLower()));
             }
 
             if (sort != null)
             {
-                url.Parameters.Add(new KeyValuePair<string, string>("sort", sort.Value.ToString().ToLower()));
+                url.Parameters.Add(new KeyValuePair<string?, string>("sort", sort.Value.ToString().ToLower()));
             }
 
-            string builtUrl = url.Build();
-            UserAnimeList userAnimeList = new UserAnimeList { Data = new List<UserAnimeListData>() };
+            string? builtUrl = url.Build();
+            UserAnimeList? userAnimeList = new UserAnimeList { Data = new List<UserAnimeListData?>() };
             while (builtUrl != null)
             {
                 _logger.LogInformation($"Getting user anime list (GET {builtUrl})...");
                 var apiCall = await _authApiCall.AuthenticatedApiCall(ApiName.Mal, AuthApiCall.CallType.GET, builtUrl);
                 if (apiCall != null)
                 {
-                    StreamReader streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
+                    StreamReader? streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
                     var options = new JsonSerializerOptions();
                     options.Converters.Add(new JsonStringEnumConverter());
-                    UserAnimeList userAnimeListPage = JsonSerializer.Deserialize<UserAnimeList>(await streamReader.ReadToEndAsync(), options);
+                    UserAnimeList? userAnimeListPage = JsonSerializer.Deserialize<UserAnimeList?>(await streamReader.ReadToEndAsync(), options);
 
                     if (userAnimeListPage?.Data != null && userAnimeListPage.Data.Count > 0)
                     {
@@ -242,10 +237,10 @@ namespace jellyfin_ani_sync.Api
             return userAnimeList.Data.ToList();
         }
 
-        public async Task<UpdateAnimeStatusResponse> UpdateAnimeStatus(int animeId, int numberOfWatchedEpisodes, Status? status = null,
+        public async Task<UpdateAnimeStatusResponse?> UpdateAnimeStatus(int animeId, int numberOfWatchedEpisodes, Status? status = null,
             bool? isRewatching = null, int? numberOfTimesRewatched = null, DateTime? startDate = null, DateTime? endDate = null)
         {
-            UrlBuilder url = new UrlBuilder
+            UrlBuilder? url = new UrlBuilder
             {
                 Base = $"{ApiUrl}/anime/{animeId}/my_list_status"
             };
@@ -285,18 +280,18 @@ namespace jellyfin_ani_sync.Api
 
             var builtUrl = url.Build();
 
-            UpdateAnimeStatusResponse updateResponse;
+            UpdateAnimeStatusResponse? updateResponse;
             try
             {
                 var apiCall = await _authApiCall.AuthenticatedApiCall(ApiName.Mal, AuthApiCall.CallType.PUT, builtUrl, new FormUrlEncodedContent(body.ToArray()));
 
                 if (apiCall != null)
                 {
-                    StreamReader streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
+                    StreamReader? streamReader = new StreamReader(await apiCall.Content.ReadAsStreamAsync());
                     var options = new JsonSerializerOptions();
                     options.Converters.Add(new JsonStringEnumConverter());
                     _logger.LogInformation($"Updating anime status (PUT {builtUrl})...");
-                    updateResponse = JsonSerializer.Deserialize<UpdateAnimeStatusResponse>(await streamReader.ReadToEndAsync(), options);
+                    updateResponse = JsonSerializer.Deserialize<UpdateAnimeStatusResponse?>(await streamReader.ReadToEndAsync(), options);
                     _logger.LogInformation("Update complete");
                 }
                 else
