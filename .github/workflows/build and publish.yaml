@@ -60,9 +60,9 @@ jobs:
         run: |
           TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           jq --arg version "${{ env.VERSION }}" \
-             --arg changelog "https://github.com/ryandash/jellyfin-plugin-myanimelist/releases/tag/v${{ env.VERSION }}" \
+             --arg changelog "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/tag/v${{ env.VERSION }}" \
              --arg checksum "${{ env.CHECKSUM }}" \
-             --arg sourceUrl "https://github.com/ryandash/jellyfin-plugin-myanimelist/releases/download/v${{ env.VERSION }}/myanimelist_${{ env.VERSION }}.zip" \
+             --arg sourceUrl "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/download/v${{ env.VERSION }}/myanimelist_${{ env.VERSION }}.zip" \
              --arg targetAbi "${{ env.TARGET_ABI }}" \
              --arg timestamp "$TIMESTAMP" \
              '.[0].versions = [{

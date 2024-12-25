@@ -1,37 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Users\\Ryan\\Documents\\GitHub\\jellyfin-myanimelist-sync\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{BA49DF0A-1074-48FD-8FB9-ADFC63EDBED4}|jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj|d:\\users\\ryan\\documents\\github\\jellyfin-myanimelist-sync\\jellyfin-ani-sync\\jellyfin-myanimelist-sync.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{BA49DF0A-1074-48FD-8FB9-ADFC63EDBED4}|jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj|solutionrelative:jellyfin-ani-sync\\jellyfin-myanimelist-sync.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "jellyfin-MyAnimeList-sync",
-              "DocumentMoniker": "D:\\Users\\Ryan\\Documents\\GitHub\\jellyfin-myanimelist-sync\\jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj",
-              "RelativeDocumentMoniker": "jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj",
-              "ToolTip": "D:\\Users\\Ryan\\Documents\\GitHub\\jellyfin-myanimelist-sync\\jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj",
-              "RelativeToolTip": "jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAC0AAAAlAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2024-12-25T22:42:00.013Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }
