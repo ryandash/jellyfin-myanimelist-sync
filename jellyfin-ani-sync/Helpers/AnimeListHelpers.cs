@@ -23,7 +23,7 @@ namespace jellyfin_ani_sync.Helpers
         /// <param name="episodeNumber">Episode number.</param>
         /// <param name="seasonNumber">Season number.</param>
         /// <returns></returns>
-        public static async Task<(int? MyAnimeListId, int? episodeOffset)> GetMyAnimeListId(ILogger logger, Video video, int episodeNumber, int seasonNumber, AnimeListXml animeListXml)
+        public static (int? MyAnimeListId, int? episodeOffset) GetMyAnimeListId(ILogger logger, Video video, int episodeNumber, int seasonNumber, AnimeListXml animeListXml)
         {
             int MyAnimeListId;
             if (animeListXml == null) return (null, null);
@@ -89,9 +89,6 @@ namespace jellyfin_ani_sync.Helpers
                                 // is movie / only has one season / no related; just return the only result
                                 return int.TryParse(related.First().MyAnimeListid, out MyAnimeListId) ? (MyAnimeListId, null) : (null, null);
                             }
-                            logger.LogInformation($"(MyAnimeList) Anime {(video is Episode episodeWithoutSeason ? episodeWithoutSeason.Name : video.Name)} found in anime XML file");
-                            // is movie / only has one season / no related; just return the only result
-                            return int.TryParse(foundAnime.First().MyAnimeListid, out MyAnimeListId) ? (MyAnimeListId, null) : (null, null);
                         }
 
                         break;

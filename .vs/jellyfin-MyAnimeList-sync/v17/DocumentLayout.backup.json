@@ -1,37 +1,12 @@
 {
   "Version": 1,
   "WorkspaceRootPath": "D:\\Users\\Ryan\\Documents\\GitHub\\jellyfin-myanimelist-sync\\",
-  "Documents": [
-    {
-      "AbsoluteMoniker": "D:0:0:{BA49DF0A-1074-48FD-8FB9-ADFC63EDBED4}|jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj|d:\\users\\ryan\\documents\\github\\jellyfin-myanimelist-sync\\jellyfin-ani-sync\\updateproviderstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{BA49DF0A-1074-48FD-8FB9-ADFC63EDBED4}|jellyfin-ani-sync\\jellyfin-MyAnimeList-sync.csproj|solutionrelative:jellyfin-ani-sync\\updateproviderstatus.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    }
-  ],
+  "Documents": [],
   "DocumentGroupContainers": [
     {
       "Orientation": 0,
       "VerticalTabListWidth": 256,
-      "DocumentGroups": [
-        {
-          "DockedWidth": 200,
-          "SelectedChildIndex": 0,
-          "Children": [
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "UpdateProviderStatus.cs",
-              "DocumentMoniker": "D:\\Users\\Ryan\\Documents\\GitHub\\jellyfin-myanimelist-sync\\jellyfin-ani-sync\\UpdateProviderStatus.cs",
-              "RelativeDocumentMoniker": "jellyfin-ani-sync\\UpdateProviderStatus.cs",
-              "ToolTip": "D:\\Users\\Ryan\\Documents\\GitHub\\jellyfin-myanimelist-sync\\jellyfin-ani-sync\\UpdateProviderStatus.cs",
-              "RelativeToolTip": "jellyfin-ani-sync\\UpdateProviderStatus.cs",
-              "ViewState": "AgIAAFUAAAAAAAAAAAAAAG8AAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-12-17T06:44:32.059Z",
-              "EditorCaption": ""
-            }
-          ]
-        }
-      ]
+      "DocumentGroups": []
     }
   ]
 }
