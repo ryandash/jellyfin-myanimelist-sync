@@ -272,10 +272,6 @@ async function initialLoad(common) {
                 page.querySelector('#watchedTickboxUpdatesProvider').checked = config.watchedTickboxUpdatesProvider;
             if (config.callbackRedirectUrl)
                 page.querySelector('#callbackRedirectUrlInput').value = config.callbackRedirectUrl;
-            if (config.shikimoriAppName)
-                page.querySelector('#shikimoriAppName').value = config.shikimoriAppName;
-            if (config.simklUpdateAll)
-                page.querySelector('#simklUpdateAll').checked = config.simklUpdateAll;
             if (config.updateNsfw)
                 page.querySelector('#UpdateNsfw').checked = config.updateNsfw;
             page.querySelector('#linkTimeExpire').value = config.authenticationLinkExpireTimeMinutes && config.authenticationLinkExpireTimeMinutes !== 0 ? config.authenticationLinkExpireTimeMinutes : 1440;
@@ -285,32 +281,11 @@ async function initialLoad(common) {
             page.querySelector('#clientSecretDescription').style.display = "block";
             page.querySelector('#authorizeDevice').style.display = "block";
             page.querySelector('#authorizeDeviceDescription').style.display = "block";
-            page.querySelector('#shikimoriAppNameContainer').style.display = "none";
-            page.querySelector('#simklUpdateAllContainer').style.display = "none";
             page.querySelector('#testAuthenticationDescription').innerHTML = "Once you have authenticated your user, click the below button to test the authentication:";
             page.querySelector('#clientIdLabel').innerHTML = "Client ID";
             page.querySelector('#clientIdDescription').innerHTML = "The client ID from your provider application.";
             page.querySelector('#clientSecretLabel').innerHTML = "Client Secret";
             page.querySelector('#clientSecretDescription').innerHTML = "The client secret from your provider application.<b>This value will be stored in plain text in the plugin config. Make sure no untrusted users have access to the file.</b>";
-            if (providerName === "Kitsu") {
-                page.querySelector('#clientIdLabel').innerHTML = "Username";
-                page.querySelector('#clientIdDescription').innerHTML = "The username used to login to the provider application.";
-                page.querySelector('#clientSecretLabel').innerHTML = "Password";
-                page.querySelector('#clientSecretDescription').innerHTML = "The password used to login to the provider application.<b>This value will be stored in plain text in the plugin config. Make sure no untrusted users have access to the file.</b>";
-            } else if (providerName === "Annict") {
-                page.querySelector('#clientIdLabel').innerHTML = "Personal Access Token";
-                page.querySelector('#clientIdDescription').innerHTML = "The personal access token from your provider application.<b>This value will be stored in plain text in the plugin config. Make sure no untrusted users have access to the file.</b>"
-                page.querySelector('#clientSecret').style.display = "none";
-                page.querySelector('#clientSecretLabel').style.display = "none";
-                page.querySelector('#clientSecretDescription').style.display = "none";
-                page.querySelector('#authorizeDevice').style.display = "none";
-                page.querySelector('#authorizeDeviceDescription').style.display = "none";
-                page.querySelector('#testAuthenticationDescription').innerHTML = "Click the below button to test the authentication:";
-            } else if (providerName === "Shikimori") {
-                page.querySelector('#shikimoriAppNameContainer').style.display = "block";
-            } else if (providerName === "Simkl") {
-                page.querySelector('#simklUpdateAllContainer').style.display = "block";
-            }
 
             if (config.callbackUrl)
                 page.querySelector('#apiUrl').value = config.callbackUrl;
@@ -338,12 +313,9 @@ async function initialLoad(common) {
                 config.ProviderApiAuth.push(authConfig);
             }
 
-            if (clientId && clientSecret && name !== "Kitsu") {
-                authConfig.ClientId = clientId;
-                authConfig.ClientSecret = clientSecret;
-            } else {
-                config.ProviderApiAuth.splice(config.ProviderApiAuth.indexOf(authConfig), 1);
-            }
+            authConfig.ClientId = clientId;
+            authConfig.ClientSecret = clientSecret;  
+            
         } else {
             config.ProviderApiAuth = [];
             config.ProviderApiAuth.push({
@@ -382,8 +354,6 @@ async function initialLoad(common) {
             config.animeListSaveLocation = document.querySelector('#animeListSaveLocation').value;
             config.watchedTickboxUpdatesProvider = document.querySelector('#watchedTickboxUpdatesProvider').checked;
             config.callbackRedirectUrl = document.querySelector('#callbackRedirectUrlInput').value;
-            config.shikimoriAppName = document.querySelector('#shikimoriAppName').value;
-            config.simklUpdateAll = document.querySelector('#simklUpdateAll').checked;
             config.updateNsfw = document.querySelector('#UpdateNsfw').checked;
             config.authenticationLinkExpireTimeMinutes = document.querySelector('#linkTimeExpire').value;
 
@@ -394,19 +364,9 @@ async function initialLoad(common) {
             userConfig.PlanToWatchOnly = document.querySelector('#PlanToWatchOnly').checked;
             userConfig.RewatchCompleted = document.querySelector('#RewatchCompleted').checked;
 
-            if (document.querySelector('#selectProvider').value === "Annict") {
-                // just save the details directly
-                if (!userConfig.UserApiAuth)
-                    userConfig.UserApiAuth = [];
-                var existingConfig = userConfig.UserApiAuth.filter(i => i.Name === "Annict");
-                if (existingConfig.length > 0) {
-                    existingConfig[0].AccessToken = document.querySelector('#clientId').value.toString();
-                } else {
-                    userConfig.UserApiAuth.push({
-                        "Name": "Annict",
-                        "AccessToken": document.querySelector('#clientId').value.toString()
-                    })
-                }
+            if (saveTempAuth) {
+                config.currentlyAuthenticatingUser = userId;
+                config.currentlyAuthenticatingProvider = document.querySelector('#selectProvider').value;
             }
 
             ApiClient.updatePluginConfiguration(PluginConfig.pluginUniqueId, config).then(function (result) {

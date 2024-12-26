@@ -51,7 +51,7 @@ namespace jellyfin_ani_sync
                     return false;
                 }
 
-                if (CheckIfFileSizeHasChanged(formattedResponse.Size))
+                if (await CheckIfFileSizeHasChanged(formattedResponse.Size))
                 {
                     await GetLatestAnimeList(client, formattedResponse.DownloadUrl);
                 }
@@ -69,7 +69,7 @@ namespace jellyfin_ani_sync
         /// </summary>
         /// <param name="fileSize">File size to compare with.</param>
         /// <returns></returns>
-        private bool CheckIfFileSizeHasChanged(int? fileSize)
+        private async Task<bool> CheckIfFileSizeHasChanged(int fileSize)
         {
             FileInfo animeListFile = new FileInfo(Path);
             if (animeListFile.Exists) return animeListFile.Length != fileSize;

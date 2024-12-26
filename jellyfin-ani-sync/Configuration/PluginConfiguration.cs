@@ -55,16 +55,6 @@ namespace jellyfin_ani_sync.Configuration
         public bool watchedTickboxUpdatesProvider { get; set; }
 
         /// <summary>
-        /// Shikimori app name, which is required on all Shikimori API calls
-        /// </summary>
-        public string shikimoriAppName { get; set; }
-
-        /// <summary>
-        /// True to update all simkl series episodes to current point.
-        /// </summary>
-        public bool simklUpdateAll { get; set; }
-
-        /// <summary>
         /// True to update NSFW anime.
         /// </summary>
         public bool updateNsfw { get; set; }

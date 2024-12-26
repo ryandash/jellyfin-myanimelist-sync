@@ -1,5 +1,6 @@
 #nullable enable
 using jellyfin_ani_sync.Configuration;
+using jellyfin_ani_sync.Models;
 using MediaBrowser.Common.Net;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Authentication;
@@ -16,7 +17,7 @@ namespace jellyfin_ani_sync.Api
 {
     public class ApiAuthentication
     {
-        private readonly ApiName _provider;
+        private ApiName _provider;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ApiAuthentication> _logger;
         private readonly string _authApiUrl;
@@ -29,22 +30,26 @@ namespace jellyfin_ani_sync.Api
         {
             _provider = provider;
 
-            if (provider == ApiName.Mal)
+            switch (provider)
             {
-                _authApiUrl = "https://myanimelist.net/v1/oauth2";
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException(nameof(provider), provider, null);
+                case ApiName.Mal:
+                    _authApiUrl = "https://myanimelist.net/v1/oauth2";
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(provider), provider, null);
             }
 
             _httpClientFactory = httpClientFactory;
             _memoryCache = memoryCache;
             _logger = loggerFactory.CreateLogger<ApiAuthentication>();
-
-            _providerApiAuth = overrideProviderApiAuth ??
-                Plugin.Instance?.PluginConfiguration.ProviderApiAuth?.FirstOrDefault(item => item.Name == _provider)
-                ?? throw new NullReferenceException($"No {provider} provider API auth in plugin config");
+            if (overrideProviderApiAuth != null)
+            {
+                _providerApiAuth = overrideProviderApiAuth;
+            }
+            else
+            {
+                _providerApiAuth = Plugin.Instance?.PluginConfiguration.ProviderApiAuth?.FirstOrDefault(item => item.Name == _provider) ?? throw new NullReferenceException($"No {provider} provider API auth in plugin config");
+            }
 
             var userCallbackUrl = Plugin.Instance.PluginConfiguration.callbackUrl;
             if (overrideRedirectUrl != null && overrideRedirectUrl != "local")
@@ -53,29 +58,33 @@ namespace jellyfin_ani_sync.Api
             }
             else
             {
-                if (overrideRedirectUrl == "local" && httpContextAccessor.HttpContext != null)
+                if (overrideRedirectUrl is "local" && httpContextAccessor.HttpContext != null)
                 {
                     _redirectUrl = serverApplicationHost.ListenWithHttps ? $"https://{httpContextAccessor.HttpContext.Connection.LocalIpAddress}:{serverApplicationHost.HttpsPort}/AniSync/authCallback" : $"http://{httpContextAccessor.HttpContext.Connection.LocalIpAddress}:{serverApplicationHost.HttpPort}/AniSync/authCallback";
                 }
                 else
                 {
-                    _redirectUrl = userCallbackUrl != null
-                        ? userCallbackUrl + "/AniSync/authCallback"
-                        : serverApplicationHost.ListenWithHttps
-                            ? $"https://{httpContextAccessor.HttpContext.Connection.LocalIpAddress}:{serverApplicationHost.HttpsPort}/AniSync/authCallback"
-                            : $"http://{httpContextAccessor.HttpContext.Connection.LocalIpAddress}:{serverApplicationHost.HttpPort}/AniSync/authCallback";
+                    if (userCallbackUrl != null)
+                    {
+                        _redirectUrl = userCallbackUrl + "/AniSync/authCallback";
+                    }
+                    else if (httpContextAccessor.HttpContext != null)
+                    {
+                        _redirectUrl = serverApplicationHost.ListenWithHttps ? $"https://{httpContextAccessor.HttpContext.Connection.LocalIpAddress}:{serverApplicationHost.HttpsPort}/AniSync/authCallback" : $"http://{httpContextAccessor.HttpContext.Connection.LocalIpAddress}:{serverApplicationHost.HttpPort}/AniSync/authCallback";
+                    }
                 }
             }
         }
 
         public string BuildAuthorizeRequestUrl()
         {
-            if (_provider == ApiName.Mal)
+            switch (_provider)
             {
-                return $"{_authApiUrl}/authorize?response_type=code&client_id={_providerApiAuth.ClientId}&code_challenge={_codeChallenge}&redirect_uri={_redirectUrl}";
+                case ApiName.Mal:
+                    return $"{_authApiUrl}/authorize?response_type=code&client_id={_providerApiAuth.ClientId}&code_challenge={_codeChallenge}&redirect_uri={_redirectUrl}";
+                default:
+                    throw new ArgumentOutOfRangeException();
             }
-
-            throw new ArgumentOutOfRangeException();
         }
 
         /// <summary>
@@ -87,12 +96,12 @@ namespace jellyfin_ani_sync.Api
         public UserApiAuth GetToken(Guid userId, string? code = null, string? refreshToken = null)
         {
             var client = _httpClientFactory.CreateClient(NamedClient.Default);
+
             HttpContent formUrlEncodedContent;
 
             if (refreshToken != null)
             {
-                formUrlEncodedContent = new FormUrlEncodedContent(new[]
-                {
+                formUrlEncodedContent = new FormUrlEncodedContent(new[] {
                     new KeyValuePair<string, string>("client_id", _providerApiAuth.ClientId),
                     new KeyValuePair<string, string>("client_secret", _providerApiAuth.ClientSecret),
                     new KeyValuePair<string, string>("grant_type", "refresh_token"),
@@ -101,16 +110,18 @@ namespace jellyfin_ani_sync.Api
             }
             else
             {
-                var content = new List<KeyValuePair<string, string>>
-                {
+                List<KeyValuePair<string, string>> content = new List<KeyValuePair<string, string>>() {
                     new KeyValuePair<string, string>("client_id", _providerApiAuth.ClientId),
                     new KeyValuePair<string, string>("client_secret", _providerApiAuth.ClientSecret),
                     new KeyValuePair<string, string>("code", code),
                     new KeyValuePair<string, string>("grant_type", "authorization_code"),
                     new KeyValuePair<string, string>("redirect_uri", _redirectUrl)
                 };
-                content.Add(new KeyValuePair<string, string>("code_verifier", _codeChallenge));
-                formUrlEncodedContent = new FormUrlEncodedContent(content);
+                if (_provider == ApiName.Mal)
+                {
+                    content.Add(new KeyValuePair<string, string>("code_verifier", _codeChallenge));
+                }
+                formUrlEncodedContent = new FormUrlEncodedContent(content.ToArray());
             }
 
             var response = client.PostAsync(new Uri($"{_authApiUrl}/token"), formUrlEncodedContent).Result;
@@ -118,25 +129,35 @@ namespace jellyfin_ani_sync.Api
             if (response.IsSuccessStatusCode)
             {
                 var content = response.Content.ReadAsStream();
-                var tokenResponse = JsonSerializer.Deserialize<TokenResponse>(new StreamReader(content).ReadToEnd());
 
-                var pluginConfig = Plugin.Instance.PluginConfiguration.UserConfig.FirstOrDefault(item => item.UserId == userId);
+                StreamReader streamReader = new StreamReader(content);
+
+                TokenResponse tokenResponse = JsonSerializer.Deserialize<TokenResponse>(streamReader.ReadToEnd());
+
+                UserConfig? pluginConfig = Plugin.Instance.PluginConfiguration.UserConfig.FirstOrDefault(item => item.UserId == userId);
 
                 if (pluginConfig != null)
                 {
                     var apiAuth = pluginConfig.UserApiAuth?.FirstOrDefault(item => item.Name == _provider);
 
-                    var newUserApiAuth = new UserApiAuth
+                    UserApiAuth newUserApiAuth = new UserApiAuth
                     {
                         Name = _provider,
-                        AccessToken = tokenResponse.access_token,
-                        RefreshToken = tokenResponse.refresh_token
+                        AccessToken = tokenResponse.access_token
                     };
+
+                    if (_provider is ApiName.Mal)
+                    {
+                        newUserApiAuth.RefreshToken = tokenResponse.refresh_token;
+                    }
 
                     if (apiAuth != null)
                     {
                         apiAuth.AccessToken = tokenResponse.access_token;
-                        apiAuth.RefreshToken = tokenResponse.refresh_token;
+                        if (_provider is ApiName.Mal)
+                        {
+                            apiAuth.RefreshToken = tokenResponse.refresh_token;
+                        }
                     }
                     else
                     {
@@ -147,15 +168,15 @@ namespace jellyfin_ani_sync.Api
                     return newUserApiAuth;
                 }
 
-                throw new NullReferenceException("The user you are attempting to authenticate does not exist in the plugin's config file");
+                throw new NullReferenceException("The user you are attempting to authenticate does not exist in the plugins config file");
             }
 
-            throw new AuthenticationException($"Could not retrieve {_provider} token: {response.StatusCode} - {response.ReasonPhrase}");
+            throw new AuthenticationException($"Could not retrieve {_provider} token: " + response.StatusCode + " - " + response.ReasonPhrase);
         }
 
         public static string GeneratePkce()
         {
-            const string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
+            string characters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._~";
             var chars = new char[128];
             var random = new Random();
 
@@ -170,7 +191,7 @@ namespace jellyfin_ani_sync.Api
 
     public class TokenResponse
     {
-        public required string access_token { get; set; }
-        public required string refresh_token { get; set; }
+        public string access_token { get; set; }
+        public string refresh_token { get; set; }
     }
 }
