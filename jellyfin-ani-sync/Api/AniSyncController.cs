@@ -70,14 +70,14 @@ namespace jellyfin_ani_sync.Api
 
         [HttpGet]
         [Route("buildAuthorizeRequestUrl")]
-        public string BuildAuthorizeRequestUrl(ApiName provider, string? clientId, string? clientSecret, string? url)
+        public string BuildAuthorizeRequestUrl(ApiName provider, string clientId, string clientSecret, string? url)
         {
             return new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, new ProviderApiAuth { ClientId = clientId, ClientSecret = clientSecret }, url).BuildAuthorizeRequestUrl();
         }
 
         [HttpGet]
         [Route("testAnimeListSaveLocation")]
-        public async Task<IActionResult> TestAnimeSaveLocation(string? saveLocation)
+        public async Task<IActionResult> TestAnimeSaveLocation(string saveLocation)
         {
             if (String.IsNullOrEmpty(saveLocation))
                 return BadRequest("Save location is empty");
@@ -104,7 +104,7 @@ namespace jellyfin_ani_sync.Api
 
         [HttpGet]
         [Route("passwordGrant")]
-        public IActionResult PasswordGrantAuthentication(ApiName provider, string userId, string? username, string? password)
+        public async Task<IActionResult> PasswordGrantAuthentication(ApiName provider, string userId, string username, string password)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace jellyfin_ani_sync.Api
         [AllowAnonymous]
         [HttpGet]
         [Route("authCallback")]
-        public IActionResult MalCallback(string? code)
+        public IActionResult MalCallback(string code)
         {
             Guid userId = Plugin.Instance.PluginConfiguration.currentlyAuthenticatingUser;
             ApiName provider = Plugin.Instance.PluginConfiguration.currentlyAuthenticatingProvider;
@@ -157,7 +157,7 @@ namespace jellyfin_ani_sync.Api
         [HttpGet]
         [Route("user")]
         // this only works for mal atm, needs to work for anilist as well
-        public async Task<ActionResult> GetUser(ApiName? apiName, string userId)
+        public async Task<ActionResult> GetUser(ApiName apiName, string userId)
         {
             UserConfig? userConfig = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(item => item.UserId == Guid.Parse(userId));
             if (userConfig == null)
@@ -218,10 +218,10 @@ namespace jellyfin_ani_sync.Api
 
         private class Parameters
         {
-            public string? localIpAddress { get; set; }
+            public string localIpAddress { get; set; }
             public int localPort { get; set; }
             public bool https { get; set; }
-            public List<ExpandoObject>? providerList { get; set; }
+            public List<ExpandoObject> providerList { get; set; }
         }
 
         [AllowAnonymous]
@@ -234,7 +234,7 @@ namespace jellyfin_ani_sync.Api
 
         [HttpPost]
         [Route("sync")]
-        public Task Sync(ApiName provider, string? userId, SyncHelper.Status status, SyncAction? syncAction)
+        public Task Sync(ApiName provider, string userId, SyncHelper.Status status, SyncAction syncAction)
         {
             switch (syncAction)
             {

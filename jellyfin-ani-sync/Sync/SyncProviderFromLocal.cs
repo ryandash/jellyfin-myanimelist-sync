@@ -33,8 +33,8 @@ public class SyncProviderFromLocal
     private readonly ILogger<SyncProviderFromLocal> _logger;
     private readonly IMemoryCache _memoryCache;
     private readonly IAsyncDelayer _delayer;
-    private readonly IServerApplicationHost _serverApplicationHost;
-    private readonly IHttpContextAccessor _httpContextAccessor;
+    private IServerApplicationHost _serverApplicationHost;
+    private IHttpContextAccessor _httpContextAccessor;
 
     public SyncProviderFromLocal(IUserManager userManager,
         ILibraryManager libraryManager,
