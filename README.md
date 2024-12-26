@@ -10,7 +10,7 @@ This is a fork of https://github.com/vosmiic/jellyfin-ani-sync trimmed down to u
 
 ### Automatic (recommended)
 1. Navigate to Settings > Admin Dashboard > Plugins > Repositories
-2. Add a new repository with a `Repository URL` of `https://raw.githubusercontent.com/vosmiic/jellyfin-ani-sync/master/manifest.json`. The name can be anything you like.
+2. Add a new repository with a `Repository URL` of `https://raw.githubusercontent.com/ryandash/jellyfin-myanimelist-sync/refs/heads/master/manifest.json`. The name can be anything you like.
 3. Save, and navigate to Catalogue.
 4. Ani-Sync should be present. Click on it and install the latest version.
 
@@ -23,14 +23,6 @@ This is a fork of https://github.com/vosmiic/jellyfin-ani-sync trimmed down to u
 3. Restart your Jellyfin instance.
 4. Navigate to Plugins in Jellyfin (Settings > Admin Dashboard > Plugins).
 5. Adjust the settings accordingly. I would advise following the detailed instructions on the [wiki page](https://github.com/vosmiic/jellyfin-ani-sync/wiki).
-
-#### Docker
-
-There is a Docker script that will pull the last built Docker image and copy the DLL file to the given directory.
-
-```bash
-docker run --rm -v "/plugin/dir/Ani-Sync:/out" ghcr.io/vosmiic/jellyfin-ani-sync
-```
 
 ## Build
 
