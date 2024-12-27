@@ -2,9 +2,9 @@
 
 ## About
 
-MyAnimeList-Sync lets you synchorinze your Jellyfin Anime watch progress to MyAnimeList.
+MyAnimeList-Sync allows you to synchronize your Jellyfin anime watch progress with MyAnimeList.
 
-This is a fork of https://github.com/vosmiic/jellyfin-ani-sync trimmed down to use the MyAnimeList provider from my other plugin https://github.com/ryandash/jellyfin-plugin-myanimelist.
+This plugin is a streamlined fork of vosmiic's Jellyfin Ani-Sync, customized to use the MyAnimeList provider from my other plugin, Jellyfin MyAnimeList Plugin.
 
 ## Installation
 
@@ -16,13 +16,13 @@ This is a fork of https://github.com/vosmiic/jellyfin-ani-sync trimmed down to u
 
 ### Manual
 
-[See the official Jellyfin documentation for install instructions](https://jellyfin.org/docs/general/server/plugins/index.html#installing).
+[Refer to the official Jellyfin documentation for plugin installation instructions](https://jellyfin.org/docs/general/server/plugins/index.html#installing).
 
-1. Download a version from the [releases tab](https://github.com/vosmiic/jellyfin-ani-sync/releases) that matches your Jellyfin version.
-2. Copy the `meta.json` and `jellyfin-ani-sync.dll` files into `plugins/ani-sync` (see above official documentation on where to find the `plugins` folder).
-3. Restart your Jellyfin instance.
-4. Navigate to Plugins in Jellyfin (Settings > Admin Dashboard > Plugins).
-5. Adjust the settings accordingly. I would advise following the detailed instructions on the [wiki page](https://github.com/vosmiic/jellyfin-ani-sync/wiki).
+1. Download the latest version from the [releases tab](https://github.com/vosmiic/jellyfin-ani-sync/releases).
+2. Copy the `meta.json` and `jellyfin-ani-sync.dll` files into `plugins/ani-sync` (see the official documentation for the `plugin` folder location).
+3. Restart your Jellyfin server.
+4. Go to Plugins in Jellyfin (Settings > Admin Dashboard > Plugins).
+5. Adjust the plugin settings as needed. Detailed instructions are available on the [wiki page](https://github.com/vosmiic/jellyfin-ani-sync/wiki).
 
 ## Build
 
@@ -32,8 +32,7 @@ This is a fork of https://github.com/vosmiic/jellyfin-ani-sync trimmed down to u
   ```
   dotnet publish --configuration Release --output bin
   ```
-
-3. Place the dll-file in the `plugins/ani-sync` folder (you might need to create the folders) of your JF install
+3. Copy the generated .dll file to the `plugins/ani-sync` folder in your Jellyfin installation
 
 ## Services/providers
 MyAnimeList
