@@ -2,7 +2,7 @@
 
 ## About
 
-MyAnimeList-Sync lets you synchorinze your Jellyfin Anime watch progress to popular services.
+MyAnimeList-Sync lets you synchorinze your Jellyfin Anime watch progress to MyAnimeList.
 
 This is a fork of https://github.com/vosmiic/jellyfin-ani-sync trimmed down to use the MyAnimeList provider from my other plugin https://github.com/ryandash/jellyfin-plugin-myanimelist.
 
