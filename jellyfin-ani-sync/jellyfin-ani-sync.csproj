@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>jellyfin_ani_sync</RootNamespace>
-		<Version>1.3</Version>
-		<AssemblyVersion>1.3</AssemblyVersion>
-		<FileVersion>1.3</FileVersion>
+		<Version>1.4</Version>
+		<AssemblyVersion>1.4</AssemblyVersion>
+		<FileVersion>1.4</FileVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
@@ -19,28 +19,28 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Jellyfin.Controller" Version="10.10.3" />
-        <PackageReference Include="Jellyfin.Model" Version="10.10.3" />
-        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
-        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
-        <PackageReference Include="System.Collections" Version="4.3.0"/>
+        <PackageReference Include="Jellyfin.Controller" Version="10.10.5" />
+        <PackageReference Include="Jellyfin.Model" Version="10.10.5" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+        <PackageReference Include="System.Collections" Version="4.3.0" />
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="Configuration\ConfigPage.html"/>
-        <EmbeddedResource Include="Configuration\ConfigPage.html"/>
-        <None Remove="Configuration\ConfigPageJs.js"/>
-        <EmbeddedResource Include="Configuration\ConfigPageJs.js"/>
-        <None Remove="Configuration\CommonJs.js"/>
-        <EmbeddedResource Include="Configuration\CommonJs.js"/>
-        <None Remove="Configuration\ManualSync.html"/>
-        <EmbeddedResource Include="Configuration\ManualSync.html"/>
-        <None Remove="Configuration\ManualSyncJs.js"/>
-        <EmbeddedResource Include="Configuration\ManualSyncJs.js"/>
+        <None Remove="Configuration\ConfigPage.html" />
+        <EmbeddedResource Include="Configuration\ConfigPage.html" />
+        <None Remove="Configuration\ConfigPageJs.js" />
+        <EmbeddedResource Include="Configuration\ConfigPageJs.js" />
+        <None Remove="Configuration\CommonJs.js" />
+        <EmbeddedResource Include="Configuration\CommonJs.js" />
+        <None Remove="Configuration\ManualSync.html" />
+        <EmbeddedResource Include="Configuration\ManualSync.html" />
+        <None Remove="Configuration\ManualSyncJs.js" />
+        <EmbeddedResource Include="Configuration\ManualSyncJs.js" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Remove="builds\**"/>
+        <Compile Remove="builds\**" />
     </ItemGroup>
 
     <ItemGroup>
