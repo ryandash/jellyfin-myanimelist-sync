@@ -132,7 +132,7 @@ namespace jellyfin_ani_sync
                     }
                     else if (matchingAnime.NumEpisodes < episode?.IndexNumber.Value)
                     {
-                        _logger.LogInformation($"Watched episode passes total episodes in season! Checking for additional seasons/cours...");
+                        _logger.LogInformation($"Watched episode passes total episodes in season! {episode?.IndexNumber.Value}>{matchingAnime.NumEpisodes} Checking for additional seasons/cours...");
                         // either we have found the wrong series (highly unlikely) or it is a multi cour series/Jellyfin has grouped next season into the current.
                         int seasonEpisodeCounter = matchingAnime.NumEpisodes;
                         int totalEpisodesWatched = 0;
@@ -145,7 +145,7 @@ namespace jellyfin_ani_sync
                             while (seasonEpisodeCounter < episodeCount)
                             {
 
-                                var nextSeason = await GetDifferentSeasonAnime(season.Id, seasonCounter + 1, alternativeId: season.AlternativeId);
+                                var nextSeason = await GetNextSeasonAnime(season.Id, seasonCounter + 1, alternativeId: season.AlternativeId);
                                 if (nextSeason == null)
                                 {
                                     _logger.LogWarning($"Could not find next season");
@@ -443,40 +443,23 @@ namespace jellyfin_ani_sync
         /// <param name="animeId">ID of the anime to get the different season of.</param>
         /// <param name="seasonNumber">Index of the season to get.</param>
         /// <returns>The different seasons anime or null if unable to retrieve the relations.</returns>
-        internal async Task<Anime?> GetDifferentSeasonAnime(int animeId, int? seasonNumber, string? alternativeId = null)
+        internal async Task<Anime?> GetNextSeasonAnime(int animeId, int? seasonNumber, string? alternativeId = null)
         {
-            _logger.LogInformation($"Attempting to get season 1...");
-            Anime? retrievedSeason = await ApiCallHelpers.GetAnime(animeId, getRelated: true, alternativeId: alternativeId);
+            _logger.LogInformation($"Attempting to get next season for AnimeId={animeId}");
 
-            if (retrievedSeason != null)
+            var currentSeason = await ApiCallHelpers.GetAnime(animeId, getRelated: true, alternativeId: alternativeId);
+            if (currentSeason == null)
+                return null;
+
+            var sequel = currentSeason.RelatedAnime?.FirstOrDefault(r => r.RelationType == RelationType.Sequel)?.Anime;
+
+            if (sequel == null)
             {
-                int i = 1;
-                while (i != seasonNumber)
-                {
-                    RelatedAnime? initialSeasonRelatedAnime = retrievedSeason.RelatedAnime?.FirstOrDefault(item => item.RelationType == RelationType.Sequel);
-                    if (initialSeasonRelatedAnime != null)
-                    {
-                        _logger.LogInformation($"Attempting to get season {i + 1}...");
-                        Anime? nextSeason = await ApiCallHelpers.GetAnime(initialSeasonRelatedAnime.Anime.Id, getRelated: true, alternativeId: initialSeasonRelatedAnime.Anime.AlternativeId);
-
-                        if (nextSeason != null)
-                        {
-                            retrievedSeason = nextSeason;
-                        }
-                    }
-                    else
-                    {
-                        _logger.LogInformation($"Could not find any related anime sequel");
-                        return null;
-                    }
-
-                    i++;
-                }
-
-                return retrievedSeason;
+                _logger.LogInformation($"No sequel found for AnimeId={ animeId}");
+                return null;
             }
 
-            return null;
+            return await ApiCallHelpers.GetAnime(sequel.Id, getRelated: true, alternativeId: sequel.AlternativeId);
         }
 
         private async Task<Anime?> GetOva(int animeId, string? episodeName, string? alternativeId = null)

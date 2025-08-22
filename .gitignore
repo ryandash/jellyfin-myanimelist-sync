@@ -114,3 +114,5 @@ MediaBrowser.Plugins.Anime.userprefs
 
 artifacts
 .idea
+*.bin
+*.v2
