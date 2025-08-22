@@ -1,3 +1,998 @@
+0d57d96 Update build and publish.yaml
+
+0fc6a53 Update build and publish.yaml
+
+fc31c0d Minor version bump
+
+- version bump for bug fix
+
+4db3381 Fix part seasons
+
+- Old implementation always expected to start at season 1 and increment but since we already have the correct season animeId the only issue should be a season with multiple parts.
+
+bf33228 Cleanup api name + fix watch status bugs
+
+- Remove all api name things
+- Fix a few small bugs involving updating anime watch status
+
+783427b Update README.md
+f65302d Update README.md
+33ac5d9 Update README.md
+3140820 Update manifest
+
 c55e263 Rebase to fix configurationpage
 
 - Rebase with original to fix configurationpage
+
+6a3914d Update manifest
+
+64fb8d9 Fix generated manifest changelog and sourceURL
+
+- Fix copy paste mistake with workflow url links
+
+379b6f8 Update manifest
+
+7011f3c Update build and publish.yaml
+
+9844018 Cleanup
+
+- clean manifest.json to start from scratch
+- Remove unused csproj
+
+b1d6ffb Add missing version
+
+- Add missing version
+
+d522c49 main to master
+
+- change branch main to master in workflow
+
+7055c0d Fix a bunch of warnings + change to using season provider
+
+- Resolved a bunch of warnings
+- Add workflow to build and publish
+- Add dependency bot
+- Minor cleanup
+- Change from using series provider to season provider. This should fix anime that contain season parts while also reducing API calls and improving responsiveness slightly
+
+761ecb9 Update to work properly with my other plugin
+
+- Change to using only series provider information (This can be improved later to reduce the number of calls to MyAnimeList)
+
+dd583d2 Remove search by title name
+
+- Removed searching by title name forcing the MyAnimeList provider to be used
+- some cleanup (lots more to do)
+- improve .gitignore
+
+9fa4b47 Update README.md
+1000fe3 Remove all non mal providers + use MyAnimeList id
+
+- Removed all non MyAnimeList providers
+- Added MyAnimeList instead of AniDB
+- Auto format
+
+d610a93 update manifest
+
+ae37f35 updating packages
+
+1cc2e10 updating beta manifest
+
+277a984 updating plugin to the latest jellyfin libraries (10.10)
+
+4248b72 fix: convert timestamps to ISO 8601 in `unstable-manifest.json`
+bb124c0 fix: convert timestamps to ISO 8601 in `beta-manifest.json`
+22bd4d8 fix: convert timestamps to ISO 8601 in `manifest.json`
+2748e1f fix rewatching anilist series being marked as watching instead of rewatching
+
+6c7d206 updating beta manifest
+
+0d84ba2 updating packages
+
+253ae11 Fix UrlTest auth
+
+0db12da Bump actions/download-artifact from 3 to 4.1.7 in /.github/workflows
+
+Bumps [actions/download-artifact](https://github.com/actions/download-artifact) from 3 to 4.1.7.
+- [Release notes](https://github.com/actions/download-artifact/releases)
+- [Commits](https://github.com/actions/download-artifact/compare/v3...v4.1.7)
+
+---
+updated-dependencies:
+- dependency-name: actions/download-artifact
+  dependency-type: direct:production
+...
+
+Signed-off-by: dependabot[bot] <support@github.com>
+43e0219 preventing multiple unnecessary updates
+
+6facafb removing throws so update logic continues with other providers
+
+c29a226 cleaning up GetDifferentSeasonAnime
+
+2c22cb9 adding GetDifferentSeasonAnime tests
+
+6ea4dd4 fixing kitsu unit test
+
+5699823 testing update anime new rewatch
+
+410e888 test updating anime rewatchng on first episode
+
+8c44886 testing updating in progress, rewatched media
+
+8af5c7e adding rewatching and marking as completed unit tests
+
+b7533a3 adding further UpdateAnimeStatus tests
+
+56cc16a initial unit tests for UpdateAnimeStatus method
+
+cdc1bd7 creating interface for ApiCallHelpers.cs to make testing easier
+
+c25d680 fixing manifest
+
+f22f85b updating manifest
+
+3b4b279 updating jellyfin packages
+
+0e72d2e added kitsu converted user list tests
+
+64c7cf6 added test for kitsu related anime converting
+
+ab3de32 adding shikimori search converted list test
+
+fe8b32c adding annict search anime unit tests
+
+82407ec removing unnecessary parameters
+
+4277a45 adding new http client test helper function
+
+f7b1efb removing unnecessary parameters
+
+2d17c3c adding Kitsu search anime tests
+
+dfbf8ea adding search anime anilist conversion test
+
+657fd3a adding offline database call test
+
+29d0422 adding GetAniDbSeason() and ListAllSeasonOfAniDbSeries() unit tests
+
+83ae8b8 fixing docker file
+
+17d0593 fixing docker file
+
+c454b9c removing reliance on real api config
+
+708f4d6 fixing unit tests
+
+ad1b6be moving projects to their own directory, adding unit test project
+
+29b209a updating beta manifest
+
+9abb704 reverting log changes; reducing less critical logging
+
+9d7b0ab logging rate limit hits as debug so log isn't saturated
+
+3f1ea56 improve logging by including unsuccessful response message
+
+4a779e2 bringing timeout variables to outer scope so unit test package can access them
+
+fbe75d4 Update arm-server API URL
+
+29d5268 Log AniDB ID when retrieving from metadata provider
+
+910450a partially fix episode offsets
+
+9b384b9 upgrading jellyfin package version
+
+50dc8e4 returning failure when ktisu auth fails
+
+d45c702 restoring anime list path on save failure
+
+70197b4 fixing authentication by not enforcing Jellyfin authentication on call
+
+947b1ff returning content instead of blank page on authentication
+
+00aa678 improving error handling when saving anime list file location
+
+a422594 fixing mal not returning an error on failed auth test
+
+14505be added tabs, separate manual sync page
+
+c073db6 catching user list population errors
+
+0b89575 returning better error when generating auth link fails
+
+583309b returning better error when auth test fails
+
+5a03254 anime list save location verification
+
+5e911c8 increasing api security by requiring auth on all calls
+
+adb1ceb Add missing "targetAbi" to new releases.
+
+The manifest was missing the "targetAbi" field for the newest 3 releases, which caused Jellyfin to try to install unsupported versions.
+
+For example, Jellyfin 10.8.13 currently tries to install 3.2.0.0 even though that version only works on 10.9.
+dc7fa79 creating instance of delayer on plugin entry
+
+c258205 removing now unnecessary delay
+
+d4a9559 implement delayer interface for unit tests
+
+3da4d80 implementing timeout to prevent too many request responses
+
+578799f adding v3.2 to manifest
+
+051e365 attempt no 2 to fix docker build command
+
+f68e9cb update docker build command to support dotnet 8
+
+89fc3aa Fix formatting
+
+0d6e157 Changes for Jellyfin 10.9
+
+aabfbce updating docker sdk version
+
+5177691 updating beta manifest
+
+1aae4ac fix: fix library check for all items (fixes #117)
+
+This change should fix the library check for all items, even items that
+belong to the library but is not located physically inside the same
+directory as the root of the library.
+
+d2a9658 adding unstable manifest
+
+5705b08 fixing paging variable
+
+cdfd008 increasing sleep duration to guarantee we dont hit 429
+
+c0969bd retrieving id directly instead of parsing it from the site url
+
+95ac252 using chunked graphql query to improve efficiency
+
+e7db40c additional null checks
+
+15b8ae7 setting to public so unit tests can run
+
+277180e fix: if possible, match shikimori series via MAL ID
+
+30790cc chore: remove JsonConverters.IntToStringConverter
+
+Looks like it’s not necessary.
+
+807f499 fix: use graphql api for shikimori provider
+
+e429c60 fix: return full anime model for shikimori search
+
+f97064d fix: do not reset shikimori score on update
+
+a9938ba - Update vulnerable nuget packages
+- https://github.com/advisories/GHSA-9p5f-5x8v-x65m
+
+ba0d452 fix: anilist page incrementation
+
+The 'variables' dictionary was not being updated with the correct 'page' value in each iteration of the loop, leading to the same page getting request over and over.
+
+f55dac4 updating manifest
+
+192527b Finally fix the if-statement for repos
+f7ae6c3 Fix tag detection
+06fdf07 adding beta manifest info
+
+da471b2 fixing checksum
+
+22982fd adding beta manifest
+
+7544258 Don't run on forks of PR
+
+Upon further digging, I discovered that it is [impossible](https://docs.github.com/en/actions/security-guides/automatic-token-authentication#permissions-for-the-github_token) for forks of public repos to write back to the original.
+4d1a252 Allow PRs to push packages
+4bf4ff2 Add NSFW support for Anilist
+
+f608afd appending nsfw parameter if config variable is set
+
+61ab8b7 added nsfw option to config
+
+3bf9744 Add NSFW param to MAL API calls
+
+Fix #94
+b74b184 Add nightly build
+3a4eab9 Update docker.yml
+4836683 Add info on Docker to README
+9ee8925 Update docker.yml
+82a69d6 Add usage instructions
+
+ea1e629 Omit arm32 build because it has some quirks
+
+e25bb52 Fix build sript
+
+d216d0e Add build system for the plugin
+
+4774aac dealing with series without all seasons
+
+2ae8d3a adjusting tvdb metadata detection to use the new anime list detection
+
+2d2841d more accurate anime list detection
+
+e692daf retrieving anidb id via offset and/or season number
+
+55b5dc8 updating readme
+
+07657e1 passing number of watched episodes to simkl update
+
+4b67144 adding get simkl update all to config helper
+
+8be66f5 giving the user the choice to update all simkl episodes
+
+a9e6a2b retrieving all data when getting an anime via simkl
+
+bcbc1b4 changing simkl update endpoint
+
+ff276f3 editing simkl media classes
+
+2ce79f8 passing id list to update, ignoring rewatch request if simkl
+
+5845413 sending offline id list to simkl update
+
+ace9c5e adding simkl update call
+
+0420d03 added simkl id lookup call during update
+
+226a39e adding get anime by id lookup simkl call
+
+b4e924f added simkl get user anime list
+
+c7b6857 Update issue templates
+e591e46 adding simkl get anime
+
+9442581 dividing simkl media classes
+
+44aadfa added simkl search anime
+
+5887929 added testing auth for simkl
+
+841795d added simkl authentication support
+
+68427eb updating readme
+
+12a34fa getting list of english and japanese shikimori names
+
+0ad091b fixing log writing
+
+ca16aff getting related shikimori media
+
+9891cd0 Update issue templates
+d75edb1 fixing shikimori search call
+
+9caf593 adding shikimori api calls to helper
+
+2e36a0d adding shikimori user agent to api auth
+
+1fde02f returning null if unsuccessful instead of throwing
+
+4bba505 added updating user anime list
+
+d0c86c1 added json converter
+
+e5824b7 made shikimori generic paged call
+
+a2c53de adding shikimori get anime call
+
+927722e preventing throw on list shikimori anime
+
+58701d6 added user agent app name to shikimori api calls
+
+8484146 added shikimori search anime action
+
+da8db2c added shikimori app name user agent requirement
+
+dd0f741 storing shikimori user ID
+
+c8bb227 added shikimori user api call
+
+1f5529a added shikimori authentication
+
+34c056a Update issue templates
+3a423d2 updating readme
+
+12a6190 redirecting user on successful auth
+
+6f8ac3e adding new config option to config page
+
+01c54b7 adding new config option
+
+4f8b058 setting update task to nullable
+
+44060f5 locking update list on update
+
+fea3cec attempting to limit the amount of updates made to the API
+
+59c547e adding async marking as watched
+
+835b41c run library check before timeout check
+
+f4c6fa9 removing no longer supported function
+
+fa9c3ff updating manifest
+
+5546da1 fixing mal not correctly updating rewatching status on completion of rewatch
+
+3c9564c updating manifest
+
+eb96814 preparing for user config being null
+
+1ab9fba wrapping sync work in a try to prevent application-wide crashes
+
+c439887 updating readme
+
+913b00e encoding js request URLs to fix #57
+
+773c22f updating manifest
+
+0236595 creating user api auth if it does not already exist
+
+9ac99b9 updating readme
+
+92c708e updating manifest
+
+77047bb added support for annict
+
+02ed31f removing check for annict since it does not require the provider api auth fields
+
+779be48 adding annict support
+
+dab3599 extending to support annict
+
+b552215 including new fields in annict search class
+
+893d746 adding get anime class
+
+3902529 adding get anime and general fixes and additions
+
+c10e754 added alternative id to our common anime class so annict anime can have an id
+
+bcee0cd changing for graphql changes
+
+acb3820 added auth test for annict
+
+e759337 fixing annict api calls after testing
+
+d8fd7d7 moving pageinfo to media list
+
+b69b20b added annict viewer class
+
+de484f7 frontend annict changes
+
+3513ede added graphql support for annict and allow non-string variable types
+
+f5ae8b0 adding annict to apiname enum
+
+73eba8d adding new common function to graphql helper
+
+0eabe34 adding annict api calls
+
+eaf9d93 updating manifest
+
+4e0de11 checking if item path is null during library check
+
+d473a9d updating manifest
+
+929a7eb supporting anime-list defaulttvdbseason value as a and reformatting
+
+3cbdc8a updating manifest
+
+c8bf35b Assign providerIds a new instance with already known ID if yuna.moe does respond with null
+
+fb6b34d Fix manifest for version 2.3.0.0
+
+3625cf2e3429acf4040a671dff21a33fbcb615c4 removed version 2.2.1.0 from the manifest, and changed version 2.2.0.0 to point to the v2.3 tag.
+
+I don't think that's intended, and seems to mean that Jellyfin won't find the update for anyone running 2.2.x.0.
+9b08370 update libraries
+
+3625cf2 update manifest
+
+ddf83a5 Fix typo
+622f96f Perform tvdb season check on series id
+
+Restoring original behaviour when falling back to series id
+
+d6c77f8 Ensure fallback to series anidb id
+
+51b2a01 Fallback to series id if id not found at season level
+
+a446323 Fix: Download produces invalid XML if new version happens to be shorter than old version
+
+399f913 updating manifest
+
+4ccf9ef fixed user episode query issues
+
+8ef3e52 logging more info
+
+68a74bf sync fixes
+
+8bc860d updating manifest again
+
+47ad836 updating manifest
+
+87954cd moving config pages to single html and js file
+
+466d0e0 adding new functionality to controller
+
+0047b8b updating frontend
+
+03db0bc changing option values to suit new enum
+
+db21d0d using existing functionality for sync
+
+cd58bfd using enum instead of int
+
+9606d8a retrieving user played details
+
+a8cb53b changed variable names and filtering by season number
+
+d868a1d added filter by seasons
+
+8f6b0e5 adding logging
+
+231d060 changing variable name
+
+9f905b5 adding sync from local, retrieving metadata of jellyfin local series
+
+97fb612 made general sync helper
+
+56818d9 preventing infinite anime list retrieval loop
+
+2f0d25d running sync in background
+
+f93df7a fixing is_rewatching being incorrectly set
+
+e604624 attempting to parse datetime of sync before setting
+
+e4672a0 update rewatch if completed or rewatching and have not already seen the episode
+
+7c34859 setting rewatching if user is rewatching show and removing hardcoded status
+
+e6dee63 fixing anime list pathing issues on windows
+
+3aae72a Update README.md
+
+fix links
+28f6c63 Fix regression in tvdb id search
+
+Tvdb id was also being searched for in season rather than in series
+
+5782b20 Search for Anibd id within Season
+
+Anidb has no concept of series, each season has a unique id
+
+3b992b6 added metadata provider compatibility text
+
+be0863e moved button clicks to onload function
+
+e9cff58 added warning and moved users description around
+
+3c00421 extending sync support to anidb metadata provider
+
+f205add added sleep function and added summaries to methods
+
+8ce29e4 slowing down paging calls
+
+310fb82 fixing auth throw error
+
+cb3ae10 handling controller sync status
+
+c5b89a8 handle episode offsets
+
+4733461 allow users to sync watching status
+
+06c51ec retrieving progress of anime in users watch list for anilist
+
+a7aa898 fixed sync run button
+
+28ec182 fixing tab switching populating form issues
+
+ac9c70b removing console logs
+
+180743e adding mal to get user general call
+
+0378849 added new sync page
+
+5c6d6a2 added sync call
+
+80371ac added additional files
+
+4f63dd6 extending plugin pages
+
+ba75a32 added tabs
+
+255e71a separating html and js main config page
+
+517c842 added kitsu to general get anime list call
+
+79c0c35 added kitsu support
+
+0c21a13 added kitsu get anime list call
+
+72aad85 checking if provider ids are null
+
+400b784 making list status more efficient
+
+de6909d added mal support to sync
+
+903d5cb added mal get anime list
+
+398af57 made OfflineDatabaseResponse fields nullable and added mapping from ApiName
+
+19beb45 updating manifest
+
+e48ce9a updating packages to latest version
+
+d67fb2a setting completed shows as played from anilist
+
+896ef5a support multiple sources when retrieving metadata ids
+
+d4c1960 setting completed date
+
+8a83c27 adding GetAnidbSeasonNumber
+
+63461dc retrieving completed at from anilist
+
+bdc2407 adding get user and get anime list
+
+a9f6727 extending viewer
+
+c722041 getting viewers anime list
+
+49b94fd updating manifest
+
+8805b60 dotnet 5 namespace changes
+
+8ddfb4f change anime list save location config description
+
+51c1e82 allow user to empty the anime list save location field
+
+2ea1d28 added default xml save location
+
+b3a5a1b finding the correct season if Anidb ID metadata provider is available
+
+2d6d15b fixing ova detection with new features and fixing null error
+
+4f46283 making constructor neater
+
+897dd84 added update ticked as option in config
+
+16e7d23 running the update job on a separate thread due to thread locking after user ticks an entire season/show as completed
+
+1f3897e added functionality so shows are updated when the user toggles played via the interface
+
+6cb082e adapting UpdateProviderStatus.cs for other handlers and restoring functionality so rewatched shows aren't updated if watched a previous episode
+
+bd27266 moved provider update logic to separate file
+
+4312f7b further logging fixes
+
+150006d updating manifest
+
+6d472c7 removing redundant code preventing log
+
+e226d19 fixing logging errors and incorrect season detection when using anilist
+
+4580e96 fixed anime list save location validity check on windows
+
+bb5d038 change versions on manifest
+
+426a799 updating manifest
+
+c5d8178 dotnet 5 changes
+
+632c54a fixing null errors when anime not found
+
+882fbb2 logging a more generic error
+
+2268a90 updating README.md
+
+9aa4f4d adding anime list xml save location to config page
+
+8ebd6c1 attempt to download anime list xml if not found
+
+31f86c8 retuning null instead of throwing if file contents cannot be read
+
+a0b8a62 changing update anime list interval from daily to every 24 hours
+
+84ee2c8 prioritising anilist over other providers
+
+32f5886 added movie support for new scraper improvements and added support for anilist provider ID
+
+dbf9b9a adding logs
+
+92f55e6 adapted new anime episode detection into ServerEntry.cs
+
+d491b73 returning all provider ids so we dont have to make multiple calls
+
+7268989 returning both anidbid and episode offset to be used when updating
+
+65ac008 added anime offline database support
+
+5d33517 adding comments to functions
+
+7d9edab changing anime name to avoid confusion
+
+3bbfe95 added season support to ready anime list XML
+
+2509a23 added reading AniDbId from anime list XML
+
+eed10e7 added update anime list task
+
+84edf73 fixing issues with incorrect URL when client is using a different base URL
+
+e288bf0 Put an alternative title in logs if anime title is empty
+
+cf23879 Add AniList synonyms in alternative titles list
+
+52ccfc2 Add synonyms to title check
+
+59451a6 updating README.md
+
+821ac91 updating manifest.json with new version
+
+31d57f7 handling shows that have no episode count and are currently airing
+
+c70e35c adding status field to anime searches and fixing null reference error
+
+54706a4 updating manifest
+
+df23e0b checking Japanese title as well as English title
+
+471a55a updating to latest version
+
+eced6d3 updating manifest to v1.4
+
+53faf69 moved CallType to AuthApiCall.cs
+
+7e2b6b6 "Only change shows.." > "Only change anime.."
+
+a77f611 fix getova crash due to null reference
+
+652fed5 added multi-cour season support
+
+7dce70b capturing episode count during search
+
+7d56b82 updating readme
+
+07618d5 dotnet 5 namespace changes
+
+7e935a8 kitsu handles first time rewatch differently
+
+78ef3bc nullable episode count
+
+e8f68d9 verifying status does not exist
+
+3214dfb setting kitsu episode count
+
+be2d231 preventing crash on anime status not being present
+
+304094a added kitsu to ServerEntry.cs
+
+7344ae0 added ability to get related kitsu anime
+
+6e6d5fc adding kitsu calls to call helper
+
+be4a46b moving get user id to separate function
+
+33e9578 added key pairs to user config and store kitsu user id on auth
+
+89cbd1d adding kitsu update anime status function
+
+535627a adding kitsu get anime functionality
+
+58c8b6d added kitsu get user information function
+
+b35b246 added kitsu search anime function
+
+0b2badc kitsu authentication
+
+f7ea3b6 moving files around
+
+23a0116 add generate callback url function
+
+6c6653f populating api url on page load if set
+
+9947a32 small update to readme
+
+5779dc9 update manifest and readme
+
+922428e final minor frontend changes
+
+ec1197c dotnet 5 namespace changes
+
+a0e240b fixing rewatch counter
+
+1cdfffb retrieving episode count from mal get anime call
+
+4db2eb1 now support multiple auth types, and adopting new api call helpers
+
+fb7f4cc added number of episodes to anilist api conversion
+
+33ee82e separated api call methods
+
+36a40c3 changed MalApiAuthentication to ApiAuthentication
+
+a28ce54 made repeat count a variable
+
+c8e7f2d adding rewatch count for anilist api
+
+af031f4 created general api call helper
+
+db21d9d extending anilist api calls
+
+702d87a anilist get anime now returns the users watch status
+
+25cc156 limiting anilist search to only anime
+
+6cbf8ea added anilist search paging
+
+937bced setting user config as required
+
+b178932 adding anilist update anime function and moving ApiCall initialization to GraphQlHelper
+
+02b82b0 separated authenticated api call so multiple provider types can use it
+
+9c5b77b added getting currently logged in user to anilist
+
+e63b093 anilist authentication compatibility
+
+80249da frontend now supports multiple providers
+
+b3659e4 added graphql helpers and get anime function
+
+a5fd75f anilist search - changing return value and adding defensive measures
+
+fb54f84 using variables instead of formatting
+
+e70ac84 adding initial search anime function
+
+d39934d adding unit tests to readme
+
+9b0625b releasing v1.2
+
+6a171a6 restoring symbols to query when searching
+
+e9fe3ee adding ova support
+
+e9b8bbc checking if string length is over 64 first
+
+4537532 fixing manifest again
+
+58e8625 fixing manifest
+
+7ed2c25 updating readme
+
+b044a62 updating manifest
+
+9b922be truncating search query as MAL throws an error if it is longer than 64 characters, preventing fatal crashes
+
+33b3d8f adding automatic installation instructions and known issues
+
+daa1c30 swapping to 10.8 csproj
+
+d22710e adding services/providers
+
+d840529 uploading manifest and build for release
+
+ac1f3fc fixed plugin not detecting currently watching anime
+
+998726d adding currentlyAuthenticatingUser and added summaries
+
+c9a8001 using plugin config to store the currently authenticating user instead of memory cache due to errors
+
+0b6b24d linking to wiki
+
+c7d44da checking if the user is authed before making any calls and setting start on a movie after watching the first "episode"
+
+9e0575a refactored checking the status of an anime in a users list
+
+58088a2 fixed different season detection
+
+30aee05 checking if the user config is valid
+
+d06e656 catching the correct exception type
+
+7b1260b removing auth link on user change
+
+3e8a0ac changing description
+
+755a934 extension dotnet 5 compatability changes
+
+0139ff4 adding dotnet 5 compatibility for 10.7.7 release
+
+63053e2 updating name and desc
+
+5424449 handling any potential errors
+
+30ca597 using block scoped namespace for backwards compatibility
+
+47d9648 adding in progress
+
+e728e63 Update LICENSE.md
+5e3a3bb fixed bug where user was not saved to config after creating auth link
+
+d9d922a checking if auth exists and if anime has been completed before updating in mal
+
+81c7274 fixing errors thrown when config not existing and cleaning up config names
+
+2b931af adding README.md
+
+e787713 removed the hardcoded redirect url
+
+13130bb Create LICENSE.md
+682db67 adding auth warnings
+
+8d1128f letting the server owner enter their own client ID and secret
+
+73d56f0 added error handling if auth is not configured
+
+4b5da7c controller function supports multiple users
+
+7da3966 testing auth now works with multiple users
+
+74b768c removed template config
+
+1dc1c37 fixed user config settings not being displayed and cleaned up
+
+b79ffaa added multi-user support
+
+2c99f34 add start/completion date when starting/finishing anime
+
+3b13172 fixing GetAnime, if statement was pointless
+
+bcc186c added library whitelist
+
+8288345 use enum instead of string
+
+500c75a remove special characters that break the MAL API call
+
+859cefd support movies
+
+c7af4a2 extended Anime class so we get related
+
+f934d0e added ability to set shows as being re-watched and support additional seasons
+
+f63e6dd added get individual MAL anime call and added a try to limit application crashes
+
+2260276 added support for shows not on user list and further extensions to logging
+
+fe0fc70 added re-watch completed bool to config
+
+9254ac4 updating shows now supports re-watches and improved logging
+
+e794ca0 added plan to watch bool option to frontend configuration
+
+176dcb6 encoding parameters
+
+1b16cce update watching and plan to watch shows on MAL
+
+af962f1 adding support for PUT calls
+
+dcee141 added list status
+
+bd9e559 made all calls asynchronous and added update anime status
+
+d90a73f condensing Anime.cs
+
+e27ab2a adding MAL get user anime list call
+
+9f81dc7 successfully pulling and recognizing episodes from MAL API
+
+c1c5807 added MAL search anime functionality
+
+fd3d1a3 add url builder helper
+
+b307b1a added MAL API calls and auth testing
+
+17abce5 added refresh token support
+
+a4c0bbd generate MAL API auth PKCE
+
+33ab9db Initial commit.

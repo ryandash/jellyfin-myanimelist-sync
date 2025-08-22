@@ -8,6 +8,14 @@
     "overview": "Synchronize anime watch status",
     "versions": [
       {
+        "changelog": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/tag/v1.4.1",
+        "checksum": "03d9717f9a0d3b71e9075dd5bebb41cc",
+        "sourceUrl": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/download/v1.4.1/myanimelist_1.4.1.zip",
+        "targetAbi": "10.10.5",
+        "timestamp": "2025-08-22T05:52:32Z",
+        "version": "1.4.1"
+      },
+      {
         "changelog": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/tag/v1.3",
         "checksum": "8a83d3a4851e3d30692a33902bd38821",
         "sourceUrl": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/download/v1.3/myanimelist_1.3.zip",
