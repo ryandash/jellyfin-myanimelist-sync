@@ -3,9 +3,9 @@
     <PropertyGroup>
         <TargetFramework>net8.0</TargetFramework>
         <RootNamespace>jellyfin_ani_sync</RootNamespace>
-		<Version>1.4</Version>
-		<AssemblyVersion>1.4</AssemblyVersion>
-		<FileVersion>1.4</FileVersion>
+		<Version>1.4.1</Version>
+		<AssemblyVersion>1.4.1</AssemblyVersion>
+		<FileVersion>1.4.1</FileVersion>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
