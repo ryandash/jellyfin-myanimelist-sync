@@ -11,6 +11,11 @@ on:
         default: "net8.0"
         description: "The .NET target framework to build the projects with"
         type: string
+      release:
+        required: false
+        default: "false"
+        description: "Create GitHub release (true/false)"
+        type: string
 permissions:
   contents: write
 jobs:
@@ -95,6 +100,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
+        if: ${{ inputs.release == 'true' }}
         uses: ncipollo/release-action@v1
         with:
           tag: v${{ env.VERSION }}
