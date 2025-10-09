@@ -133,7 +133,7 @@ namespace jellyfin_ani_sync.Api
                             UserApiAuth newAuth;
                             try
                             {
-                                newAuth = new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory).GetToken(UserConfig.UserId, refreshToken: auth.RefreshToken);
+                                newAuth = new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache).GetToken(UserConfig.UserId, refreshToken: auth.RefreshToken);
                             }
                             catch (Exception e)
                             {
