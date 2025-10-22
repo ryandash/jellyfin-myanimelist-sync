@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using Jellyfin.Database.Implementations.Entities;
 using jellyfin_ani_sync.Helpers;
 using jellyfin_ani_sync.Interfaces;
-using Jellyfin.Database.Implementations.Entities;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Dto;
@@ -25,7 +19,7 @@ using System.Threading.Tasks;
 
 namespace jellyfin_ani_sync;
 
-public class SyncProviderFromLocal (
+public class SyncProviderFromLocal(
     IUserManager userManager,
     ILibraryManager libraryManager,
     ILoggerFactory loggerFactory,
@@ -34,13 +28,15 @@ public class SyncProviderFromLocal (
     IFileSystem fileSystem,
     IMemoryCache memoryCache,
     IAsyncDelayer delayer,
-    string userId) {
+    string userId)
+{
     private readonly Guid _userId = Guid.Parse(userId);
     private readonly ILogger<SyncProviderFromLocal> _logger = loggerFactory.CreateLogger<SyncProviderFromLocal>();
     private IServerApplicationHost _serverApplicationHost;
     private IHttpContextAccessor _httpContextAccessor;
 
-    public async Task SyncFromLocal() {
+    public async Task SyncFromLocal()
+    {
         var jellyfinLibrary = SyncHelper.GetUsersJellyfinLibrary(_userId, userManager, libraryManager);
         List<Series> userSeriesList = jellyfinLibrary.OfType<Series>().Select(baseItem => baseItem).ToList();
         await GetSeasonDetails(userSeriesList);
@@ -104,22 +100,27 @@ public class SyncProviderFromLocal (
                 _logger.LogError($"(Sync) Season index number is null. Skipping...");
                 continue;
             }
-            
+
             IEnumerable<Episode> episodes = season.GetEpisodes(user, new DtoOptions(), false).OfType<Episode>().ToArray();
-            if (!episodes.Any()) {
+            if (!episodes.Any())
+            {
                 _logger.LogInformation($"(Sync) No (user visible) episodes found for {season.Name} of {series.Name}");
             }
             _logger.LogInformation($"(Sync) Season contains {season.Children.OfType<Episode>().Count()} episodes");
             Episode latestWatchedEpisode;
 
-            try {
+            try
+            {
                 latestWatchedEpisode = episodes.Where(episode => episode.UserData.Any(userData => userData.UserId == user.Id && userData.Played)).MaxBy(episode => episode.IndexNumber);
-            } catch (Exception e) {
+            }
+            catch (Exception e)
+            {
                 _logger.LogError($"(Sync) Could not get user episodes watched for {season.Name}; error: {e.Message}");
                 continue;
             }
 
-            if (latestWatchedEpisode == null) {
+            if (latestWatchedEpisode == null)
+            {
                 _logger.LogInformation($"(Sync) No episodes watched for {season.Name}");
                 continue;
             }

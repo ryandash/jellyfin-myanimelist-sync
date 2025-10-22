@@ -38,8 +38,10 @@ namespace jellyfin_ani_sync
             }, cancellationToken);
         }
 
-        public IEnumerable<TaskTriggerInfo> GetDefaultTriggers() {
-            var trigger = new TaskTriggerInfo {
+        public IEnumerable<TaskTriggerInfo> GetDefaultTriggers()
+        {
+            var trigger = new TaskTriggerInfo
+            {
                 Type = TaskTriggerInfoType.IntervalTrigger,
                 IntervalTicks = TimeSpan.FromDays(1).Ticks
             };

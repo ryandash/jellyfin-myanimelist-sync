@@ -25,7 +25,7 @@ namespace jellyfin_ani_sync.Api
         private readonly string _authApiUrl;
         private readonly string _redirectUrl;
         private readonly ProviderApiAuth _providerApiAuth;
-        private readonly IMemoryCache  _memoryCache;
+        private readonly IMemoryCache _memoryCache;
         private readonly string _codeChallenge = "eZBLUX_JPk4~el62z_k3Q4fV5CzCYHoTz4iLKvwJ~9QTsTJNlzwveKCSYCSiSOa5zAm5Zt~cfyVM~3BuO4kQ0iYwCxPoeN0SOmBYR_C.QgnzyYE4KY-xIe4Vy1bf7_B4";
 
         public ApiAuthentication(ApiName provider, IHttpClientFactory httpClientFactory, IServerApplicationHost serverApplicationHost, IHttpContextAccessor httpContextAccessor, ILoggerFactory loggerFactory, IMemoryCache memoryCache, ProviderApiAuth? overrideProviderApiAuth = null, string? overrideRedirectUrl = null)

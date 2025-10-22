@@ -71,7 +71,8 @@ public class TaskProcessMarkedMedia
             {
                 RemoveFromUpdateList(item);
                 continue;
-            };
+            }
+            ;
 
             var aniSyncConfigUser = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(uc => uc.UserId == item.userId);
             List<(Guid userId, Guid? seasonId, Video baseItem)> pairedItems = new List<(Guid userId, Guid? seasonId, Video baseItem)>();

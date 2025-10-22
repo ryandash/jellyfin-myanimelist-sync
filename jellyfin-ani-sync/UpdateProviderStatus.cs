@@ -1,6 +1,5 @@
 #nullable enable
 using jellyfin_ani_sync.Api;
-using jellyfin_ani_sync.Configuration;
 using jellyfin_ani_sync.Helpers;
 using jellyfin_ani_sync.Interfaces;
 using jellyfin_ani_sync.Models;
@@ -16,7 +15,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using System;
-using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -270,7 +268,7 @@ namespace jellyfin_ani_sync
             if (detectedAnime == null) return;
             if (detectedAnime.MyListStatus.NumEpisodesWatched >= episodeNumber.Value)
             {
-                _logger.LogInformation($"Already watched up to {detectedAnime.MyListStatus.NumEpisodesWatched}"); 
+                _logger.LogInformation($"Already watched up to {detectedAnime.MyListStatus.NumEpisodesWatched}");
                 return;
             }
             if (detectedAnime.MyListStatus != null && detectedAnime.MyListStatus.Status == Status.Watching)
@@ -455,7 +453,7 @@ namespace jellyfin_ani_sync
 
             if (sequel == null)
             {
-                _logger.LogInformation($"No sequel found for AnimeId={ animeId}");
+                _logger.LogInformation($"No sequel found for AnimeId={animeId}");
                 return null;
             }
 
