@@ -50,7 +50,7 @@ jobs:
 
       - name: Generate ZIP for DLLs
         run: |
-          zip -j myanimelist_${VERSION}.zip main_repo/**/bin/Release/*.dll
+          find main_repo -path '*/bin/Release/*.dll' -print0 | xargs -0 zip -j myanimelist_${VERSION}.zip
 
       - name: Generate MD5 Checksum for ZIP
         id: checksum
