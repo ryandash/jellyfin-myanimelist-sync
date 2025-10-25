@@ -1,5 +1,5 @@
-135b956 Update build and publish.yaml
+b2f6fcc Delete docker.yml
 
-fd0f686 Try and fix bad zip file
+e52542b Combine changes into 1 commit + Minimal File Changes
 
-1785abd Update manifest
+- Make it easier to rebase upstream
