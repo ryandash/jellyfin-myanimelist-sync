@@ -6,7 +6,6 @@
     "overview": "Synchronize anime watch status",
     "owner": "Ryan Dash",
     "category": "Anime",
-    "imageUrl": "",
     "versions": [
       {
         "version": "1.6.0",
