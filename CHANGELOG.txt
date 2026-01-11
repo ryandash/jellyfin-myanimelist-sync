@@ -1,5 +1,9 @@
-b2f6fcc Delete docker.yml
+1e9f097 Update jellyfin-ani-sync.csproj
 
-e52542b Combine changes into 1 commit + Minimal File Changes
+- Change versioning to standard versioning format
 
-- Make it easier to rebase upstream
+93e6d26 Fix workflow bug
+
+56b1546 Update manifest.json
+
+cf9b147 Update manifest
