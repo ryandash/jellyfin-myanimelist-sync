@@ -1,16 +1,9 @@
 on:
   workflow_dispatch:
-    inputs:
-      dotnet-version:
-        required: false
-        default: "9.0.x"
-        description: "The .NET version to setup for the build"
-        type: string
-      dotnet-target:
-        required: false
-        default: "net9.0"
-        description: "The .NET target framework to build the projects with"
-        type: string
+
+concurrency:
+  group: release
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -19,26 +12,23 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Main Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           path: main_repo
           fetch-depth: 0
 
       - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+        uses: actions/setup-dotnet@v5
         with:
-          dotnet-version: "${{ inputs.dotnet-version }}"
+          dotnet-version: "9.0.x"
+          cache: true
+          cache-dependency-path: main_repo/jellyfin-ani-sync/packages.lock.json
 
-      - name: Cache NuGet packages
-        uses: actions/cache@v3
-        with:
-          path: ~/.nuget/packages
-          key: ${{ runner.os }}-nuget-${{ inputs.dotnet-version }}-${{ hashFiles('**/*.csproj') }}
-          restore-keys: |
-            ${{ runner.os }}-nuget-${{ inputs.dotnet-version }}-
+      - name: Restore dependencies
+        run: dotnet restore main_repo
 
-      - name: Restore Dependencies and Build Main Repo
-        run: dotnet build main_repo --configuration Release --framework ${{ inputs.dotnet-target }}
+      - name: Build Plugin
+        run: dotnet build main_repo -c Release
 
       - name: Extract Version and ABI from csproj
         id: extract_version_abi
@@ -51,6 +41,10 @@ jobs:
       - name: Generate ZIP for DLLs
         run: |
           find main_repo -path '*/bin/Release/*.dll' -print0 | xargs -0 zip -j myanimelist-sync_${VERSION}.zip
+
+      - name: Create ZIP
+        run: |
+          zip -j myanimelist-sync_${VERSION}.zip main_repo/jellyfin-ani-sync/bin/Release/net9.0/*.dll
 
       - name: Generate MD5 Checksum for ZIP
         id: checksum
@@ -97,7 +91,7 @@ jobs:
           echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create GitHub Release
-        uses: ncipollo/release-action@v1
+        uses: ncipollo/release-action@v1.20.0
         with:
           tag: v${{ env.VERSION }}
           name: "Version ${{ env.VERSION }}"
@@ -110,7 +104,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Commit Manifest to Main
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         with:
           commit_message: "Update manifest"
           branch: master
