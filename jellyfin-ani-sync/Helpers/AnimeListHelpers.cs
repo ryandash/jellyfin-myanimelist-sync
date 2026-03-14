@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Entities.Movies;
+using MediaBrowser.Controller.Entities.TV;
 using Microsoft.Extensions.Logging;
 
 namespace jellyfin_ani_sync.Helpers {
@@ -27,7 +27,10 @@ namespace jellyfin_ani_sync.Helpers {
             Dictionary<string, string> providers;
             if (video is Episode) {
                 //Search for Anidb id at season level
-                providers = (video as Episode).Season.ProviderIds.ContainsKey("Anidb") ? (video as Episode).Season.ProviderIds : (video as Episode).Series.ProviderIds;
+                providers = ((video as Episode).Season.ProviderIds.ContainsKey("Anidb") ||
+                             (video as Episode).Season.ProviderIds.ContainsKey("MyAnimeList"))
+                    ? (video as Episode).Season.ProviderIds
+                    : (video as Episode).Series.ProviderIds;
             } else if (video is Movie) {
                 providers = (video as Movie).ProviderIds;
             } else {
@@ -133,6 +136,12 @@ namespace jellyfin_ani_sync.Helpers {
                         );
                     }
                 }
+            }
+
+            if (providers.ContainsKey("MyAnimeList")) {
+                int malID;
+                if (!int.TryParse(providers["MyAnimeList"], out malID)) return (null, null);
+
             }
 
             return (null, null);

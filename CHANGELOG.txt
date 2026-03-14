@@ -1,0 +1,9 @@
+1e9f097 Update jellyfin-ani-sync.csproj
+
+- Change versioning to standard versioning format
+
+93e6d26 Fix workflow bug
+
+56b1546 Update manifest.json
+
+cf9b147 Update manifest
