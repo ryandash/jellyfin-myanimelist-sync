@@ -1,9 +1,45 @@
-1e9f097 Update jellyfin-ani-sync.csproj
+1dee3a5 Update building workflow
 
-- Change versioning to standard versioning format
+- Update building workflow
 
-93e6d26 Fix workflow bug
+- Improve .gitignore
 
-56b1546 Update manifest.json
+- Version bump (previous commit)
 
-cf9b147 Update manifest
+- Add packages.lock.json for building
+
+9b2bd38 merge changes
+
+3dd9c22 updating manifest
+
+575749d fix(ci): use unique artifact names per matrix job to avoid upload conflicts
+
+cb1a53a fix(docker): upgrade base image to dotnet sdk 9.0 and fix FROM casing
+
+2b194b8 ci(docker): refactor GHCR workflow, and action upgrades
+
+b62147c extending auth exception logging
+
+abd4903 updated beta manifest
+
+8512d19 Display provider status in dropdown
+
+60a2111 added separate path segment for user configuration
+
+3f4cc00 added ability to deauthenticate user
+
+25639f1 added kitsu support to user level authentication
+
+9c0b5be Refactoring and updates after review
+
+216ee2c various review changes
+
+7e9dbb4 Create user-side configuration page & expose user api methods
+
+922cd17 Fix "Plan to Watch" status wrongly detected as "Completed"
+
+325f147 updating beta manifest
+
+f069735 allowing custom arm server usage
+
+07d2bfb updating manifest
