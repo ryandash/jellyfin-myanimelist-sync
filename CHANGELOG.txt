@@ -1,45 +1,83 @@
-1dee3a5 Update building workflow
+8e5d95c Version bump + workflow update
 
-- Update building workflow
+- Bump version after merge with origin and refactor
 
-- Improve .gitignore
+- Improve workflow
 
-- Version bump (previous commit)
+f7904ef Add back MyAnimeList Provider
 
-- Add packages.lock.json for building
+- Add back MyAnimeList id provider
 
-9b2bd38 merge changes
+9ec53ae Revert to origin/main
 
-3dd9c22 updating manifest
+7a3d395 updating manifest
 
-575749d fix(ci): use unique artifact names per matrix job to avoid upload conflicts
+63aedfc updating package references for unit tests
 
-cb1a53a fix(docker): upgrade base image to dotnet sdk 9.0 and fix FROM casing
+e737861 updating jellyfin packages
 
-2b194b8 ci(docker): refactor GHCR workflow, and action upgrades
+598dc59 remove unused season property
 
-b62147c extending auth exception logging
+8b3cf30 test: parametrize first-episode rewatch test across Mal/AniList/Shikimori
 
-abd4903 updated beta manifest
+04f88e6 test: fix stale AniList expectation in UpdateAnimeReWatchingInProgress
 
-8512d19 Display provider status in dropdown
+9466d39 fix: sync Shikimori rewatch progress
 
-60a2111 added separate path segment for user configuration
+4179089 fix: use shikimori.io for authenticated API calls
 
-3f4cc00 added ability to deauthenticate user
+0cd3eee updating beta manifest
 
-25639f1 added kitsu support to user level authentication
+ba73c77 updating dockerfile dotnet sdk version
 
-9c0b5be Refactoring and updates after review
+ff4af06 updating packages and framework for Jellyfin v12
 
-216ee2c various review changes
+a66ba40 Update radme with manami-project/anime-offline-database archival and new alternative link
 
-7e9dbb4 Create user-side configuration page & expose user api methods
+588be4a updating beta manifest
 
-922cd17 Fix "Plan to Watch" status wrongly detected as "Completed"
+e05523b ignore media items with specific tag
 
-325f147 updating beta manifest
+a6648e2 Add Monogatari season resolution fixtures (#1)
 
-f069735 allowing custom arm server usage
+Twelve AniDB entries share TVDB 102261: six on TVDB season 0, and six
+each owning one sequential season. Trimmed copies of real
+anime-list-full.xml rows.
 
-07d2bfb updating manifest
+This is the shape a long-running franchise takes in a Shokofin library,
+where every arc is a separate AniDB series behind a single TVDB entry.
+Complements the existing Bleach fixture, which covers many entries
+crowded onto one season; this covers many entries spread across
+sequential seasons instead.
+
+Two tests: each numbered season resolves to its own AniDB series, and
+the season 0 rows are never selected for a numbered season.
+7a36920 adding case insensitive comparisons to the other provider ID lookups; not assuming shoko metadata is present during merge check; remove offset removal from absolute episode number
+
+e87e75a ading null check
+
+2c5aedf fix: only check rewatch completed if anime is not on plan to watch list
+
+9ac97a0 fix: update AniList anime status from 'Plan to watch' to 'Watching'
+
+8a33525 Subtracted mapping offset in absolute-episode match; Routed merged-season lookup through GetAniDbByEpisodeOffset; Logged diagnostics at debug
+
+10dca70 reinstating #216 fix
+
+4098f52 ShokoServer, Fix AniDB resolution for sequels, split cours and title-search fallbacks
+
+5caa5cf attempt to use mapping offset if available during season lookup
+
+8aa8aa0 updating manifest
+
+be5af5b fix: strip trailing slash from custom ARM base URL
+
+91736d9 update beta manifest
+
+3d7b2cc added custom domain support for shikimori
+
+2e1ccc7 updating beta manifest
+
+f05e7fc update the currently implemented rate limiting
+
+08cd4bf Update manifest
