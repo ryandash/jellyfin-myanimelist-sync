@@ -33,12 +33,10 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
 using Jellyfin.Database.Implementations.Entities;
 
-namespace jellyfin_ani_sync.Api
-{
+namespace jellyfin_ani_sync.Api {
     [ApiController]
     [Route("[controller]")]
-    public class AniSyncController : ControllerBase
-    {
+    public class AniSyncController : ControllerBase {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILoggerFactory _loggerFactory;
         private readonly IServerApplicationHost _serverApplicationHost;
@@ -88,27 +86,22 @@ namespace jellyfin_ani_sync.Api
         [Authorize(Policy = Policies.RequiresElevation)]
         [HttpGet]
         [Route("testAnimeListSaveLocation")]
-        public async Task<IActionResult> TestAnimeSaveLocation(string saveLocation)
-        {
+        public async Task<IActionResult> TestAnimeSaveLocation(string saveLocation) {
             if (String.IsNullOrEmpty(saveLocation))
                 return BadRequest("Save location is empty");
 
-            try
-            {
+            try {
                 await using (System.IO.File.Create(
                                  Path.Combine(
                                      saveLocation,
                                      Path.GetRandomFileName()
                                  ),
                                  1,
-                                 FileOptions.DeleteOnClose))
-                {
+                                 FileOptions.DeleteOnClose)) {
                 }
 
                 return Ok(string.Empty);
-            }
-            catch (Exception e)
-            {
+            } catch (Exception e) {
                 return BadRequest(e.Message);
             }
         }
@@ -123,23 +116,18 @@ namespace jellyfin_ani_sync.Api
                 return StatusCode(500, $"Could not authenticate; {e.Message}");
             }
 
-            if (provider == ApiName.Kitsu)
-            {
+            if (provider == ApiName.Kitsu) {
                 var userConfig = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(item => item.UserId == Guid.Parse(userId));
 
-                if (userConfig != null)
-                {
+                if (userConfig != null) {
                     KitsuApiCalls kitsuApiCalls = new KitsuApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, userConfig);
                     var kitsuUserConfig = await kitsuApiCalls.GetUserInformation();
                     if (kitsuUserConfig == null)
                         return StatusCode(500, "Could not authenticate");
                     var existingKeyPair = userConfig.KeyPairs.FirstOrDefault(item => item.Key == "KitsuUserId");
-                    if (existingKeyPair != null)
-                    {
+                    if (existingKeyPair != null) {
                         existingKeyPair.Value = kitsuUserConfig.Id.ToString();
-                    }
-                    else
-                    {
+                    } else {
                         userConfig.KeyPairs.Add(new KeyPairs { Key = "KitsuUserId", Value = kitsuUserConfig.Id.ToString() });
                     }
 
@@ -154,17 +142,14 @@ namespace jellyfin_ani_sync.Api
         [HttpGet]
         [Route("user")]
         // this only works for mal atm, needs to work for anilist as well
-        public async Task<ActionResult> GetUser(ApiName apiName, string userId)
-        {
+        public async Task<ActionResult> GetUser(ApiName apiName, string userId) {
             UserConfig? userConfig = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(item => item.UserId == Guid.Parse(userId));
-            if (userConfig == null)
-            {
+            if (userConfig == null) {
                 _logger.LogError("User not found in config");
                 return StatusCode(500, "User not found in config");
             }
 
-            switch (apiName)
-            {
+            switch (apiName) {
                 case ApiName.Mal:
                     MalApiCalls malApiCalls = new MalApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, userConfig);
 
@@ -174,101 +159,79 @@ namespace jellyfin_ani_sync.Api
                     AniListApiCalls aniListApiCalls = new AniListApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, userConfig);
 
                     AniListViewer.Viewer? user = await aniListApiCalls.GetCurrentUser();
-                    if (user == null)
-                    {
+                    if (user == null) {
                         return StatusCode(500, "Authentication failed");
                     }
 
-                    return new OkObjectResult(new MalApiCalls.User
-                    {
+                    return new OkObjectResult(new MalApiCalls.User {
                         Name = user.Name
                     });
                 case ApiName.Kitsu:
                     KitsuApiCalls kitsuApiCalls;
-                    try
-                    {
+                    try {
                         kitsuApiCalls = new KitsuApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, userConfig);
-                    }
-                    catch (ArgumentNullException)
-                    {
+                    } catch (ArgumentNullException) {
                         _logger.LogError("User could not be retrieved from API");
                         return StatusCode(500, "User could not be retrieved from API");
                     }
 
                     var apiCall = await kitsuApiCalls.GetUserInformation();
-                    if (apiCall == null)
-                    {
+                    if (apiCall == null) {
                         return StatusCode(500, "Authentication failed");
                     }
 
-                    return new OkObjectResult(new MalApiCalls.User
-                    {
+                    return new OkObjectResult(new MalApiCalls.User {
                         Name = apiCall.Name
                     });
                 case ApiName.Annict:
                     // sleep the thread for a short amount of time to let the user config save
                     Thread.Sleep(100);
                     AnnictApiCalls annictApiCalls;
-                    try
-                    {
+                    try {
                         annictApiCalls = new AnnictApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, userConfig);
-                    }
-                    catch (ArgumentNullException)
-                    {
+                    } catch (ArgumentNullException) {
                         _logger.LogError("User could not be retrieved from API");
                         return StatusCode(500, "User could not be retrieved from API");
                     }
 
                     var annictApiCall = await annictApiCalls.GetCurrentUser();
-                    if (annictApiCall == null)
-                    {
+                    if (annictApiCall == null) {
                         return StatusCode(500, "Authentication failed");
                     }
 
-                    return new OkObjectResult(new MalApiCalls.User
-                    {
+                    return new OkObjectResult(new MalApiCalls.User {
                         Name = annictApiCall.AnnictSearchData.Viewer.username
                     });
                 case ApiName.Shikimori:
                     string? shikimoriAppName = ConfigHelper.GetShikimoriAppName(_logger);
-                    if (string.IsNullOrEmpty(shikimoriAppName))
-                    {
+                    if (string.IsNullOrEmpty(shikimoriAppName)) {
                         return StatusCode(500, "No App Name");
                     }
 
                     ShikimoriApiCalls shikimoriApiCalls = new ShikimoriApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, new Dictionary<string, string> { { "User-Agent", shikimoriAppName } }, userConfig);
 
                     ShikimoriApiCalls.User? shikimoriUserApiCall = await shikimoriApiCalls.GetUserInformation();
-                    if (shikimoriUserApiCall != null)
-                    {
-                        return new OkObjectResult(new MalApiCalls.User
-                        {
+                    if (shikimoriUserApiCall != null) {
+                        return new OkObjectResult(new MalApiCalls.User {
                             Name = shikimoriUserApiCall.Name
                         });
-                    }
-                    else
-                    {
+                    } else {
                         _logger.LogError("User could not be retrieved from API");
                         return StatusCode(500, "User could not be retrieved from API");
                     }
                 case ApiName.Simkl:
                     string? simklClientId = ConfigHelper.GetSimklClientId(_logger);
-                    if (string.IsNullOrEmpty(simklClientId))
-                    {
+                    if (string.IsNullOrEmpty(simklClientId)) {
                         return StatusCode(500, "No Client ID");
                     }
 
                     var simklApiCalls = new SimklApiCalls(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _memoryCache, _delayer, new Dictionary<string, string> { { "simkl-api-key", simklClientId } }, userConfig);
 
-                    if (await simklApiCalls.GetLastActivity())
-                    {
-                        return new OkObjectResult(new MalApiCalls.User
-                        {
+                    if (await simklApiCalls.GetLastActivity()) {
+                        return new OkObjectResult(new MalApiCalls.User {
                             Name = null
                         });
-                    }
-                    else
-                    {
+                    } else {
                         return StatusCode(500, "Not authenticated");
                     }
             }
@@ -287,10 +250,8 @@ namespace jellyfin_ani_sync.Api
         [Authorize(Policy = Policies.RequiresElevation)]
         [HttpPost]
         [Route("sync")]
-        public Task Sync(ApiName provider, string userId, SyncHelper.Status status, SyncAction syncAction)
-        {
-            switch (syncAction)
-            {
+        public Task Sync(ApiName provider, string userId, SyncHelper.Status status, SyncAction syncAction) {
+            switch (syncAction) {
                 case SyncAction.UpdateProvider:
                     SyncProviderFromLocal syncProviderFromLocal = new SyncProviderFromLocal(_userManager, _libraryManager, _loggerFactory, _httpClientFactory, _applicationPaths, _memoryCache, _delayer, userId);
                     return syncProviderFromLocal.SyncFromLocal();
@@ -311,12 +272,11 @@ namespace jellyfin_ani_sync.Api
         // The following endpoints are user-specific versions of the above endpoints (do not require elevated access)
 
         #region User Endpoints
-
+        
         [Authorize]
         [HttpGet]
         [Route("user/buildAuthorizeRequestUrl")]
-        public ActionResult BuildAuthorizeRequestUrlUser(ApiName provider, Guid user)
-        {
+        public ActionResult BuildAuthorizeRequestUrlUser(ApiName provider, Guid user) {
             if (!UserPagesEnabled()) return NotFound();
             var jellyfinUser = _userManager.GetUser(User, user);
             if (jellyfinUser == null) return Forbid();
@@ -324,8 +284,7 @@ namespace jellyfin_ani_sync.Api
             var providerApiAuth = Plugin.Instance?.PluginConfiguration.ProviderApiAuth?
                 .FirstOrDefault(providerApiAuth => providerApiAuth.Name == provider);
 
-            if (providerApiAuth == null)
-            {
+            if (providerApiAuth == null) {
                 _logger.LogError($"User {jellyfinUser.Id} failed to build authorize request URL: Provider not configured.");
                 return Forbid();
             }
@@ -341,20 +300,18 @@ namespace jellyfin_ani_sync.Api
         [Authorize]
         [HttpGet]
         [Route("user/passwordGrant")]
-        public async Task<IActionResult> PasswordGrantAuthenticationUser(ApiName provider, [FromQuery] Guid user, string username, string password)
-        {
+        public async Task<IActionResult> PasswordGrantAuthenticationUser(ApiName provider, [FromQuery] Guid user, string username, string password) {
             if (!UserPagesEnabled()) return NotFound();
             var jellyfinUser = _userManager.GetUser(User, user);
             if (jellyfinUser == null) return Forbid();
-
+            
             return await PasswordGrantAuthentication(provider, jellyfinUser.Id.ToString(), username, password);
         }
 
         [Authorize]
         [HttpGet]
         [Route("user/user")]
-        public async Task<ActionResult> GetUserUser(ApiName apiName, Guid user)
-        {
+        public async Task<ActionResult> GetUserUser(ApiName apiName, Guid user) {
             if (!UserPagesEnabled()) return NotFound();
             var jellyfinUser = _userManager.GetUser(User, user);
             if (jellyfinUser == null) return Forbid();
@@ -365,17 +322,15 @@ namespace jellyfin_ani_sync.Api
         [Authorize]
         [HttpGet]
         [Route("user/configuration")]
-        public ActionResult GetConfigurationUser(Guid user)
-        {
+        public ActionResult GetConfigurationUser(Guid user) {
             if (!UserPagesEnabled()) return NotFound();
             var jellyfinUser = _userManager.GetUser(User, user);
             if (jellyfinUser == null) return Forbid();
 
             var userConfig = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(userConfig => userConfig.UserId == jellyfinUser.Id);
-            if (userConfig == null)
-            {
+            if (userConfig == null) {
                 _logger.LogTrace("User not found in config, first time?");
-                return Ok(new { });
+                return Ok(new {});
             }
 
             return Ok(userConfig);
@@ -404,24 +359,20 @@ namespace jellyfin_ani_sync.Api
                 .FirstOrDefault(x => x.UserId == jellyfinUser.Id);
 
             HashSet<Guid> libraryIds = [];
-            foreach (var library in dto.LibraryToCheck)
-            {
-                if (Guid.TryParse(library, out var libraryId))
-                {
+            foreach (var library in dto.LibraryToCheck) {
+                if (Guid.TryParse(library, out var libraryId)) {
                     libraryIds.Add(libraryId);
                 }
             }
 
-            if (!_libraryManager.UserHasAccessToLibraries(libraryIds, jellyfinUser))
-            {
+            if (!_libraryManager.UserHasAccessToLibraries(libraryIds, jellyfinUser)) {
                 _logger.LogError($"User {jellyfinUser.Id} does not have access to requested libraries ({String.Join(", ", dto.LibraryToCheck)})");
                 return Forbid();
             }
 
             if (userConfig == null)
             {
-                userConfig = new UserConfig
-                {
+                userConfig = new UserConfig {
                     UserId = jellyfinUser.Id,
                     PlanToWatchOnly = dto.PlanToWatchOnly,
                     RewatchCompleted = dto.RewatchCompleted,
@@ -447,8 +398,7 @@ namespace jellyfin_ani_sync.Api
         [Authorize]
         [HttpGet]
         [Route("user/parameters")]
-        public object GetFrontendParametersUser(ParameterInclude[]? includes)
-        {
+        public object GetFrontendParametersUser(ParameterInclude[]? includes) {
             if (!UserPagesEnabled()) return NotFound();
             return GetFrontendParameters(includes, true, true);
         }
@@ -456,8 +406,7 @@ namespace jellyfin_ani_sync.Api
         [Authorize]
         [HttpGet]
         [Route("user/deauthenticate")]
-        public IActionResult DeauthenticateUser([FromQuery] Guid user, [FromQuery] ApiName apiName)
-        {
+        public IActionResult DeauthenticateUser([FromQuery] Guid user, [FromQuery] ApiName apiName) {
             if (!UserPagesEnabled()) return NotFound();
             return DeauthenticateProvidedUser(user, apiName);
         }
@@ -497,7 +446,7 @@ namespace jellyfin_ani_sync.Api
 
             return File(stream, MimeTypes.GetMimeType(view.EmbeddedResourcePath));
         }
-
+        
         #endregion
 
 
@@ -506,8 +455,7 @@ namespace jellyfin_ani_sync.Api
         [AllowAnonymous]
         [HttpGet]
         [Route("authCallback")]
-        public IActionResult AuthCallback(string code, string? state)
-        {
+        public IActionResult AuthCallback(string code, string? state) {
             if (state == null) return BadRequest("State is empty");
             StoredState? storedState = MemoryCacheHelper.ConsumeState(_memoryCache, state);
             if (storedState == null) return BadRequest("User not found or link already used/expired, try again");
@@ -516,12 +464,9 @@ namespace jellyfin_ani_sync.Api
                 string replacedCallbackRedirectUrl = Plugin.Instance.PluginConfiguration.callbackRedirectUrl.Replace("{{LocalIpAddress}}", Request.HttpContext.Connection.LocalIpAddress != null ? Request.HttpContext.Connection.LocalIpAddress.ToString() : "localhost")
                     .Replace("{{LocalPort}}", _serverApplicationHost.ListenWithHttps ? _serverApplicationHost.HttpsPort.ToString() : _serverApplicationHost.HttpPort.ToString());
 
-                if (Uri.TryCreate(replacedCallbackRedirectUrl, UriKind.Absolute, out _))
-                {
+                if (Uri.TryCreate(replacedCallbackRedirectUrl, UriKind.Absolute, out _)) {
                     return Redirect(replacedCallbackRedirectUrl);
-                }
-                else
-                {
+                } else {
                     _logger.LogWarning($"Invalid redirect URL ({replacedCallbackRedirectUrl}), skipping redirect.");
                 }
             }
@@ -532,13 +477,11 @@ namespace jellyfin_ani_sync.Api
         [AllowAnonymous]
         [HttpGet]
         [Route("apiUrlTest")]
-        public string ApiUrlTest()
-        {
+        public string ApiUrlTest() {
             return "This is the correct URL.";
         }
 
-        private Parameters GetFrontendParameters(ParameterInclude[]? includes, bool onlyConfiguredProviders, bool onlyLibrariesUserHasAccessTo)
-        {
+        private Parameters GetFrontendParameters(ParameterInclude[]? includes, bool onlyConfiguredProviders, bool onlyLibrariesUserHasAccessTo) {
             Parameters toReturn = new Parameters();
 
             if (includes == null || includes.Contains(ParameterInclude.ProviderList))
@@ -549,12 +492,9 @@ namespace jellyfin_ani_sync.Api
                     .Select(x => x.Name)
                     .ToHashSet();
 
-                if (configured != null)
-                {
+                if (configured != null) {
                     configured.Add(ApiName.Kitsu);
-                }
-                else
-                {
+                } else {
                     configured = [ApiName.Kitsu];
                 }
 
@@ -591,16 +531,12 @@ namespace jellyfin_ani_sync.Api
             if (includes == null || includes.Contains(ParameterInclude.Libraries))
             {
                 Dictionary<Guid, string> libraries = new Dictionary<Guid, string>();
-                if (onlyLibrariesUserHasAccessTo)
-                {
+                if (onlyLibrariesUserHasAccessTo) {
                     User? jellyfinUser = _userManager.GetUser(User, null);
-                    if (jellyfinUser != null)
-                    {
+                    if (jellyfinUser != null) {
                         libraries = _libraryManager.GetLibrariesUserHasAccessTo(jellyfinUser);
                     }
-                }
-                else
-                {
+                } else {
                     libraries = _libraryManager.GetVirtualFolders().ToDictionary(virtualFolderInfo => Guid.Parse(virtualFolderInfo.ItemId), virtualFolderInfo => virtualFolderInfo.Name);
                 }
                 toReturn.libraries = new List<ExpandoObject>();
@@ -616,18 +552,14 @@ namespace jellyfin_ani_sync.Api
             return toReturn;
         }
 
-        private IActionResult DeauthenticateProvidedUser(Guid user, ApiName apiName)
-        {
+        private IActionResult DeauthenticateProvidedUser(Guid user, ApiName apiName) {
             var jellyfinUser = _userManager.GetUser(User, user);
             if (jellyfinUser == null) return Forbid();
-
+            
             (bool success, string? reason) deauthenticateUser = ConfigHelper.DeauthenticateUser(jellyfinUser.Id, apiName);
-            if (deauthenticateUser.success)
-            {
+            if (deauthenticateUser.success) {
                 return Ok();
-            }
-            else
-            {
+            } else {
                 _logger.LogError($"Error while deauthenticating user {jellyfinUser.Id}: {deauthenticateUser.reason}");
                 return StatusCode(500);
             }

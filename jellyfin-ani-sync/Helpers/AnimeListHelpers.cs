@@ -7,8 +7,8 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller.Entities;
-using MediaBrowser.Controller.Entities.Movies;
 using MediaBrowser.Controller.Entities.TV;
+using MediaBrowser.Controller.Entities.Movies;
 using Microsoft.Extensions.Logging;
 
 namespace jellyfin_ani_sync.Helpers {
@@ -231,12 +231,6 @@ namespace jellyfin_ani_sync.Helpers {
                         );
                     }
                 }
-            }
-
-            if (providers.ContainsKey("MyAnimeList")) {
-                int malID;
-                if (!int.TryParse(providers["MyAnimeList"], out malID)) return (null, null);
-
             }
 
             return (null, null);
