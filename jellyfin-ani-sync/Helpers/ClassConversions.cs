@@ -37,7 +37,7 @@ namespace jellyfin_ani_sync.Helpers {
 
                 switch (aniListAnime.MediaListEntry.MediaListStatus) {
                     case AniListSearch.MediaListStatus.Current:
-                        anime.MyListStatus.Status = Status.Plan_to_watch;
+                        anime.MyListStatus.Status = Status.Watching;
                         break;
                     case AniListSearch.MediaListStatus.Completed:
                         anime.MyListStatus.Status = Status.Completed;

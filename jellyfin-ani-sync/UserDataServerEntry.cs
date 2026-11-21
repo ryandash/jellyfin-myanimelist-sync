@@ -9,7 +9,6 @@ using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model.Entities;
-using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Hosting;
@@ -18,7 +17,6 @@ using Microsoft.Extensions.Logging;
 namespace jellyfin_ani_sync {
     public class UserDataServerEntry : IHostedService {
         private readonly IUserDataManager _userDataManager;
-        private readonly IFileSystem _fileSystem;
         private readonly ILibraryManager _libraryManager;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IServerApplicationHost _serverApplicationHost;
@@ -30,7 +28,6 @@ namespace jellyfin_ani_sync {
         private Task? _updateTask;
 
         public UserDataServerEntry(IUserDataManager userDataManager,
-            IFileSystem fileSystem,
             ILibraryManager libraryManager,
             ILoggerFactory loggerFactory,
             IHttpContextAccessor httpContextAccessor,
@@ -39,7 +36,6 @@ namespace jellyfin_ani_sync {
             IMemoryCache memoryCache,
             IApplicationPaths applicationPaths) {
             _userDataManager = userDataManager;
-            _fileSystem = fileSystem;
             _libraryManager = libraryManager;
             loggerFactory.CreateLogger<UpdateProviderStatus>();
             _httpContextAccessor = httpContextAccessor;
@@ -48,7 +44,7 @@ namespace jellyfin_ani_sync {
             _memoryCache = memoryCache;
             _applicationPaths = applicationPaths;
             _delayer = new Delayer();
-            _taskProcessMarkedMedia = new TaskProcessMarkedMedia(loggerFactory, _libraryManager, _fileSystem, _memoryCache, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _delayer);
+            _taskProcessMarkedMedia = new TaskProcessMarkedMedia(loggerFactory, _libraryManager, _memoryCache, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _delayer);
         }
 
         public Task StartAsync(CancellationToken cancellationToken) {

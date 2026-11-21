@@ -1,12 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-	<PropertyGroup>
-		<TargetFramework>net9.0</TargetFramework>
-		<RootNamespace>jellyfin_ani_sync</RootNamespace>
-		
-		<Version>1.6.0.2</Version>
-		<AssemblyVersion>1.6.0.2</AssemblyVersion>
-		<FileVersion>1.6.0.2</FileVersion>
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <RootNamespace>jellyfin_ani_sync</RootNamespace>
+    </PropertyGroup>
 
 		<DebugType>none</DebugType>
 		<IsPublishable>False</IsPublishable>
@@ -18,14 +15,14 @@
 		<BaseOutputPath>C:\ProgramData\Jellyfin\Server\plugins\Jellyfin.Plugin.MyAnimeList.AniSync</BaseOutputPath>
 	</PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
-		<PackageReference Include="Jellyfin.Controller" Version="10.11.0" />
-		<PackageReference Include="Jellyfin.Model" Version="10.11.0" />
-		<FrameworkReference Include="Microsoft.AspNetCore.App"/>
-		<PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
-		<PackageReference Include="System.Collections" Version="4.3.0"/>
-	</ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
+        <PackageReference Include="Jellyfin.Controller" Version="12.4.0" />
+        <PackageReference Include="Jellyfin.Model" Version="12.4.0" />
+        <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="10.0.11" />
+        <PackageReference Include="System.Collections" Version="4.3.0"/>
+    </ItemGroup>
 
 	<ItemGroup>
 		<None Remove="Configuration\ConfigPage.html" />

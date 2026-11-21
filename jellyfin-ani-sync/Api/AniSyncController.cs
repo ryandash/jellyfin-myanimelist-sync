@@ -25,7 +25,6 @@ using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Library;
 using MediaBrowser.Model;
-using MediaBrowser.Model.IO;
 using MediaBrowser.Model.Plugins;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -48,7 +47,6 @@ namespace jellyfin_ani_sync.Api
         private readonly IUserManager _userManager;
         private readonly IApplicationPaths _applicationPaths;
         private readonly IUserDataManager _userDataManager;
-        private readonly IFileSystem _fileSystem;
         private readonly ILogger<AniSyncController> _logger;
         private readonly IMemoryCache _memoryCache;
         private readonly IAsyncDelayer _delayer;
@@ -61,9 +59,7 @@ namespace jellyfin_ani_sync.Api
             IUserManager userManager,
             IApplicationPaths applicationPaths,
             IUserDataManager userDataManager,
-            IFileSystem fileSystem,
-            IMemoryCache memoryCache)
-        {
+            IMemoryCache memoryCache) {
             _httpClientFactory = httpClientFactory;
             _loggerFactory = loggerFactory;
             _serverApplicationHost = serverApplicationHost;
@@ -72,7 +68,6 @@ namespace jellyfin_ani_sync.Api
             _userManager = userManager;
             _applicationPaths = applicationPaths;
             _userDataManager = userDataManager;
-            _fileSystem = fileSystem;
             _logger = loggerFactory.CreateLogger<AniSyncController>();
             _memoryCache = memoryCache;
             _delayer = new Delayer();
@@ -86,9 +81,8 @@ namespace jellyfin_ani_sync.Api
         [Authorize(Policy = Policies.RequiresElevation)]
         [HttpGet]
         [Route("buildAuthorizeRequestUrl")]
-        public string BuildAuthorizeRequestUrl(ApiName provider, string clientId, string clientSecret, string? url, Guid user)
-        {
-            return new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache, new ProviderApiAuth { ClientId = clientId, ClientSecret = clientSecret }, url).BuildAuthorizeRequestUrl(user);
+        public string BuildAuthorizeRequestUrl(ApiName provider, string clientId, string clientSecret, string? url, Guid user) {
+            return new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache, _delayer, new ProviderApiAuth { ClientId = clientId, ClientSecret = clientSecret }, url).BuildAuthorizeRequestUrl(user);
         }
 
         [Authorize(Policy = Policies.RequiresElevation)]
@@ -122,14 +116,10 @@ namespace jellyfin_ani_sync.Api
         [Authorize(Policy = Policies.RequiresElevation)]
         [HttpGet]
         [Route("passwordGrant")]
-        public async Task<IActionResult> PasswordGrantAuthentication(ApiName provider, string userId, string username, string password)
-        {
-            try
-            {
-                new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache, new ProviderApiAuth { ClientId = username, ClientSecret = password }).GetToken(Guid.Parse(userId));
-            }
-            catch (Exception e)
-            {
+        public async Task<IActionResult> PasswordGrantAuthentication(ApiName provider, string userId, string username, string password) {
+            try {
+                new ApiAuthentication(provider, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache, _delayer, new ProviderApiAuth { ClientId = username, ClientSecret = password }).GetToken(Guid.Parse(userId));
+            } catch (Exception e) {
                 return StatusCode(500, $"Could not authenticate; {e.Message}");
             }
 
@@ -302,7 +292,7 @@ namespace jellyfin_ani_sync.Api
             switch (syncAction)
             {
                 case SyncAction.UpdateProvider:
-                    SyncProviderFromLocal syncProviderFromLocal = new SyncProviderFromLocal(_userManager, _libraryManager, _loggerFactory, _httpClientFactory, _applicationPaths, _fileSystem, _memoryCache, _delayer, userId);
+                    SyncProviderFromLocal syncProviderFromLocal = new SyncProviderFromLocal(_userManager, _libraryManager, _loggerFactory, _httpClientFactory, _applicationPaths, _memoryCache, _delayer, userId);
                     return syncProviderFromLocal.SyncFromLocal();
                 case SyncAction.UpdateJellyfin:
                     Sync sync = new Sync(_httpClientFactory, _loggerFactory, _serverApplicationHost, _httpContextAccessor, _userManager, _libraryManager, _applicationPaths, _userDataManager, _memoryCache, _delayer, provider, status);
@@ -521,9 +511,8 @@ namespace jellyfin_ani_sync.Api
             if (state == null) return BadRequest("State is empty");
             StoredState? storedState = MemoryCacheHelper.ConsumeState(_memoryCache, state);
             if (storedState == null) return BadRequest("User not found or link already used/expired, try again");
-            new ApiAuthentication(storedState.ApiName, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache).GetToken(storedState.UserId, code);
-            if (!string.IsNullOrEmpty(Plugin.Instance?.PluginConfiguration.callbackRedirectUrl))
-            {
+            new ApiAuthentication(storedState.ApiName, _httpClientFactory, _serverApplicationHost, _httpContextAccessor, _loggerFactory, _memoryCache, _delayer).GetToken(storedState.UserId, code);
+            if (!string.IsNullOrEmpty(Plugin.Instance?.PluginConfiguration.callbackRedirectUrl)) {
                 string replacedCallbackRedirectUrl = Plugin.Instance.PluginConfiguration.callbackRedirectUrl.Replace("{{LocalIpAddress}}", Request.HttpContext.Connection.LocalIpAddress != null ? Request.HttpContext.Connection.LocalIpAddress.ToString() : "localhost")
                     .Replace("{{LocalPort}}", _serverApplicationHost.ListenWithHttps ? _serverApplicationHost.HttpsPort.ToString() : _serverApplicationHost.HttpPort.ToString());
 

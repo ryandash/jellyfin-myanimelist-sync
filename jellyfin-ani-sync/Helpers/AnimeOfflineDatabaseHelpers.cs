@@ -15,7 +15,7 @@ namespace jellyfin_ani_sync.Helpers {
             string customArmServerBaseUrl = Plugin.Instance?.Configuration.armServerBaseUrl;
             if (!string.IsNullOrEmpty(customArmServerBaseUrl)) {
                 if (Uri.TryCreate(customArmServerBaseUrl, UriKind.Absolute, out Uri baseUri) && (baseUri.Scheme == Uri.UriSchemeHttp || baseUri.Scheme == Uri.UriSchemeHttps)) {
-                    baseUrl = baseUri.AbsoluteUri;
+                    baseUrl = baseUri.AbsoluteUri.TrimEnd('/');
                 } else {
                     logger.LogWarning($"ARM server base URL ({customArmServerBaseUrl}) could not be parsed. Confirm the URL is valid. Falling back to public API...");
                 }
@@ -31,10 +31,34 @@ namespace jellyfin_ani_sync.Helpers {
             StreamReader streamReader = new StreamReader(await response.Content.ReadAsStreamAsync());
             string streamText = await streamReader.ReadToEndAsync();
 
-            var deserializedResponse = JsonSerializer.Deserialize<OfflineDatabaseResponse>(streamText);
+            // FIX 8: the previous code reported success whenever the payload merely
+            // deserialised, which hid the case of a row that exists but carries no
+            // usable provider ID. ARM returns literal `null` for an unknown ID and a
+            // partially-populated object when the offline database has the entry but
+            // not yet the cross-references. Those are very different situations and
+            // both used to log "Retrieved provider IDs".
+            logger.LogDebug($"[ani-sync-diag] ARM {(int)response.StatusCode} for {source.ToString().ToLower()}={metadataId}, body: {(streamText.Length > 400 ? streamText.Substring(0, 400) + "..." : streamText)}");
+            if (!response.IsSuccessStatusCode) {
+                logger.LogWarning($"ARM server returned {(int)response.StatusCode}; treating as no result");
+                return null;
+            }
+
+            OfflineDatabaseResponse deserializedResponse;
+            try {
+                deserializedResponse = JsonSerializer.Deserialize<OfflineDatabaseResponse>(streamText);
+            } catch (JsonException e) {
+                logger.LogError($"Could not parse ARM server response: {e.Message}");
+                return null;
+            }
+
             if (deserializedResponse == null) return null;
+
+            logger.LogDebug($"[ani-sync-diag] ARM parsed -> anidb={Fmt(deserializedResponse.AniDb)}, anilist={Fmt(deserializedResponse.Anilist)}, myanimelist={Fmt(deserializedResponse.MyAnimeList)}, kitsu={Fmt(deserializedResponse.Kitsu)}");
+
             return deserializedResponse;
         }
+
+        private static string Fmt(int? value) => value?.ToString() ?? "<none>";
 
         public class OfflineDatabaseResponse {
             [JsonPropertyName("anilist")] public int? Anilist { get; set; }

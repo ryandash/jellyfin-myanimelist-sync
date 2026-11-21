@@ -148,7 +148,9 @@ public class Sync {
             return;
         }
         foreach (BaseItem baseItem in userLibrary) {
-            if (baseItem is Series series) {
+            if (SyncHelper.MediaShouldBeIgnored(baseItem)) {
+                _logger.LogDebug($"(Sync) Ignoring {baseItem.Name}; ignore tag detected");
+            } else if (baseItem is Series series) {
                 (AnimeOfflineDatabaseHelpers.Source? source, int? providerId) = SyncHelper.GetSeriesProviderId(series);
 
                 if (providerId != null && providerId != 0 && source != null) {
@@ -163,13 +165,25 @@ public class Sync {
 
                     foreach ((Season season, DateTime? completedAt, int episodesWatched) seasonsTuple in seasonsToMarkAsPlayed) {
                         if (seasonsTuple.season != null) {
+                            if (SyncHelper.MediaShouldBeIgnored(seasonsTuple.season)) {
+                                _logger.LogDebug($"(Sync) Ignoring {seasonsTuple.season.Name}; ignore tag detected");
+                                continue;
+                            }
+
                             var seasonEpisodes = seasonsTuple.season.Children.Where(episode => episode is Episode && episode.IndexNumber != null);
                             if (seasonsTuple.episodesWatched != -1) {
                                 seasonEpisodes = seasonEpisodes.Where(episode => episode.IndexNumber != null && episode.IndexNumber <= seasonsTuple.episodesWatched);
                             }
 
+                            bool anyEpisodeIgnored = false;
                             foreach (var seasonChild in seasonEpisodes) {
                                 if (seasonChild is Episode episode) {
+                                    // Season and series ignore tags were already checked above; only the episode's own tag matters here.
+                                    if (SyncHelper.HasIgnoreTag(seasonChild)) {
+                                        _logger.LogDebug($"(Sync) Ignoring {seasonChild.Name}; ignore tag detected");
+                                        anyEpisodeIgnored = true;
+                                        continue;
+                                    }
                                     _logger.LogInformation($"(Sync) Setting {episode.Series.Name} season {episode.Season.IndexNumber} episode {episode.IndexNumber} for user {userId} as played...");
 
                                     if (seasonsTuple.completedAt != null) {
@@ -180,9 +194,13 @@ public class Sync {
                                 }
                             }
 
-                            // this could fail because show has ovas, hard to detect. todo warn users
-                            _userDataManager.SaveUserData(user, seasonsTuple.season, SetUserData(user, seasonsTuple.season, seasonsTuple.completedAt), UserDataSaveReason.UpdateUserData, CancellationToken.None);
-                            _logger.LogInformation("(Sync) Saved");
+                            if (anyEpisodeIgnored) {
+                                _logger.LogDebug($"(Sync) Not marking season {seasonsTuple.season.Name} as played; one or more episodes carry the ignore tag");
+                            } else {
+                                // this could fail because show has ovas, hard to detect. todo warn users
+                                _userDataManager.SaveUserData(user, seasonsTuple.season, SetUserData(user, seasonsTuple.season, seasonsTuple.completedAt), UserDataSaveReason.UpdateUserData, CancellationToken.None);
+                                _logger.LogInformation("(Sync) Saved");
+                            }
                         }
                     }
                 } else {

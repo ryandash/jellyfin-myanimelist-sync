@@ -12,7 +12,6 @@ using MediaBrowser.Controller;
 using MediaBrowser.Controller.Dto;
 using MediaBrowser.Controller.Entities.TV;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -25,7 +24,6 @@ public class SyncProviderFromLocal (
     ILoggerFactory loggerFactory,
     IHttpClientFactory httpClientFactory,
     IApplicationPaths applicationPaths,
-    IFileSystem fileSystem,
     IMemoryCache memoryCache,
     IAsyncDelayer delayer,
     string userId) {
@@ -42,7 +40,7 @@ public class SyncProviderFromLocal (
 
     private async Task GetSeasonDetails(List<Series> userSeriesList) {
         _logger.LogInformation($"(Sync) Starting sync to provider from local process");
-        UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(fileSystem, libraryManager, loggerFactory, _httpContextAccessor, _serverApplicationHost, httpClientFactory, applicationPaths, memoryCache, delayer);
+        UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(libraryManager, loggerFactory, _httpContextAccessor, _serverApplicationHost, httpClientFactory, applicationPaths, memoryCache, delayer);
 
         foreach (Series series in userSeriesList) {
             _logger.LogInformation($"(Sync) Retrieved {series.Name}'s seasons latest watched episode and when it was watched...");
@@ -50,6 +48,10 @@ public class SyncProviderFromLocal (
             if (toMarkAsCompleted != null) {
                 foreach (Episode episodeDateTime in toMarkAsCompleted) {
                     if (episodeDateTime != null) {
+                        if (SyncHelper.MediaShouldBeIgnored(episodeDateTime)) {
+                            _logger.LogDebug($"(Sync) Ignoring {episodeDateTime.Name}; ignore tag detected");
+                            continue;
+                        }
                         try {
                             await updateProviderStatus.Update(episodeDateTime, _userId, true);
                         } catch (Exception e) {

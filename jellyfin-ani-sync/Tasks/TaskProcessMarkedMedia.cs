@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using jellyfin_ani_sync.Helpers;
 using jellyfin_ani_sync.Interfaces;
 using MediaBrowser.Common.Configuration;
 using MediaBrowser.Controller;
 using MediaBrowser.Controller.Entities;
 using MediaBrowser.Controller.Library;
-using MediaBrowser.Model.IO;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Logging;
@@ -20,7 +20,6 @@ public class TaskProcessMarkedMedia {
     private readonly ILoggerFactory _loggerFactory;
     private readonly ILogger<TaskProcessMarkedMedia> _logger;
     private readonly ILibraryManager _libraryManager;
-    private readonly IFileSystem _fileSystem;
     private readonly IMemoryCache _memoryCache;
     private readonly IHttpContextAccessor _httpContextAccessor;
     private readonly IServerApplicationHost _serverApplicationHost;
@@ -28,10 +27,9 @@ public class TaskProcessMarkedMedia {
     private readonly IApplicationPaths _applicationPaths;
     private readonly IAsyncDelayer _delayer;
 
-    public TaskProcessMarkedMedia(ILoggerFactory loggerFactory, ILibraryManager libraryManager, IFileSystem fileSystem, IMemoryCache memoryCache, IHttpContextAccessor httpContextAccessor, IServerApplicationHost serverApplicationHost, IHttpClientFactory httpClientFactory, IApplicationPaths applicationPaths, IAsyncDelayer delayer) {
+    public TaskProcessMarkedMedia(ILoggerFactory loggerFactory, ILibraryManager libraryManager, IMemoryCache memoryCache, IHttpContextAccessor httpContextAccessor, IServerApplicationHost serverApplicationHost, IHttpClientFactory httpClientFactory, IApplicationPaths applicationPaths, IAsyncDelayer delayer) {
         _loggerFactory = loggerFactory;
         _libraryManager = libraryManager;
-        _fileSystem = fileSystem;
         _memoryCache = memoryCache;
         _httpContextAccessor = httpContextAccessor;
         _serverApplicationHost = serverApplicationHost;
@@ -66,7 +64,12 @@ public class TaskProcessMarkedMedia {
             
             var aniSyncConfigUser = Plugin.Instance?.PluginConfiguration.UserConfig.FirstOrDefault(uc => uc.UserId == item.userId);
             List<(Guid userId, Guid? seasonId, Video baseItem)> pairedItems = new List<(Guid userId, Guid? seasonId, Video baseItem)>();
-            if (aniSyncConfigUser != null && UpdateProviderStatus.LibraryCheck(aniSyncConfigUser, _libraryManager, _fileSystem, _logger, item.baseItem)) {
+            if (aniSyncConfigUser != null && UpdateProviderStatus.LibraryCheck(aniSyncConfigUser, _libraryManager, _logger, item.baseItem)) {
+                if (SyncHelper.MediaShouldBeIgnored(item.baseItem)) {
+                    _logger.LogDebug($"(Sync) Ignoring {item.baseItem.Name}; ignore tag detected");
+                    RemoveFromUpdateList(item);
+                    continue;
+                }
                 if (_memoryCache.TryGetValue("lastQuery", out DateTime lastQuery)) {
                     if ((DateTime.UtcNow - lastQuery).TotalSeconds <= 5) {
                         await Task.Delay(5000);
@@ -78,10 +81,14 @@ public class TaskProcessMarkedMedia {
                     AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(5)
                 });
                 
-                UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(_fileSystem, _libraryManager, _loggerFactory, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _memoryCache, _delayer);
+                UpdateProviderStatus updateProviderStatus = new UpdateProviderStatus(_libraryManager, _loggerFactory, _httpContextAccessor, _serverApplicationHost, _httpClientFactory, _applicationPaths, _memoryCache, _delayer);
                 pairedItems = itemsToUpdate.Where(items => items.seasonId == item.seasonId && items.userId == item.userId).ToList();
-                item = pairedItems.MaxBy(item => item.baseItem.IndexNumber);
-                await updateProviderStatus.Update(item.baseItem, item.userId, true);
+                var highestNonIgnoredItem = pairedItems.Where(pairedItem => !SyncHelper.MediaShouldBeIgnored(pairedItem.baseItem)).MaxBy(pairedItem => pairedItem.baseItem.IndexNumber);
+                if (highestNonIgnoredItem.Equals(default)) {
+                    _logger.LogDebug($"(Sync) Ignoring {item.baseItem.Name}; ignore tag detected on all paired episodes");
+                } else {
+                    await updateProviderStatus.Update(highestNonIgnoredItem.baseItem, highestNonIgnoredItem.userId, true);
+                }
             }
 
             if (pairedItems.Count() > 1) {

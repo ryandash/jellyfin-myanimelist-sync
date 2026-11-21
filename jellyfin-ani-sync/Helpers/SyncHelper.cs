@@ -134,6 +134,21 @@ public class SyncHelper {
         return null;
     }
 
+    private const string IgnoreTag = "jas-ignore";
+
+    /// <summary>
+    /// Whether the item itself carries the ignore tag. Does not look at parents.
+    /// </summary>
+    public static bool HasIgnoreTag(BaseItem? item) => item?.Tags.Contains(IgnoreTag, StringComparer.OrdinalIgnoreCase) == true;
+
+    /// <summary>
+    /// Whether the item, its parent season or its series carries the ignore tag.
+    /// </summary>
+    public static bool MediaShouldBeIgnored(BaseItem item) {
+        if (item == null) return false;
+        return HasIgnoreTag(item) || HasIgnoreTag(item.GetParent()) || (item is Episode episode && HasIgnoreTag(episode.Series));
+    }
+
     public class AnimeListAnimeOfflineDatabaseCombo {
         public AnimeListHelpers.AnimeListAnime AnimeListAnime { get; set; }
         public AnimeOfflineDatabaseHelpers.OfflineDatabaseResponse OfflineDatabaseResponse { get; set; }
