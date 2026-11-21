@@ -236,6 +236,48 @@ namespace jellyfin_ani_sync.Helpers {
             return (null, null);
         }
 
+        /// <summary>
+        /// Parse a MyAnimeList episode URL to retrieve its anime ID and episode number.
+        /// Expected format:
+        /// https://myanimelist.net/anime/{malId}/{animeSlug}/episode/{episodeNumber}
+        /// </summary>
+        /// <param name="url">MyAnimeList episode URL.</param>
+        /// <returns>Tuple containing the MAL ID and episode number, or null values if parsing fails.</returns>
+        public static (int? malId, int? episodeNumber) ParseMyAnimeListEpisodeUrl(string url)
+        {
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return (null, null);
+            }
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) ||
+                !string.Equals(uri.Host, "myanimelist.net", StringComparison.OrdinalIgnoreCase) &&
+                !string.Equals(uri.Host, "www.myanimelist.net", StringComparison.OrdinalIgnoreCase))
+            {
+                return (null, null);
+            }
+
+            var segments = uri.AbsolutePath
+                .Split('/', StringSplitOptions.RemoveEmptyEntries);
+
+            if (segments.Length < 5 ||
+                !string.Equals(segments[0], "anime", StringComparison.OrdinalIgnoreCase) ||
+                !string.Equals(segments[3], "episode", StringComparison.OrdinalIgnoreCase))
+            {
+                return (null, null);
+            }
+
+            if (!int.TryParse(segments[1], out var malId) ||
+                !int.TryParse(segments[4], out var episodeNumber) ||
+                malId <= 0 ||
+                episodeNumber <= 0)
+            {
+                return (null, null);
+            }
+
+            return (malId, episodeNumber);
+        }
+
         internal static (int? aniDbId, int? episodeOffset) GetAniDbByEpisodeOffset(ILogger logger, int? absoluteEpisodeNumber, int seasonNumber, int episodeNumber, List<AnimeListAnime> related) {
             if (absoluteEpisodeNumber != null) {
                 // -----------------------------------------------------------------
