@@ -8,6 +8,14 @@
     "category": "Anime",
     "versions": [
       {
+        "version": "1.7.0.0",
+        "changelog": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/tag/v1.7.0.0",
+        "targetAbi": "12.4.0",
+        "sourceUrl": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/download/v1.7.0.0/myanimelist-sync_1.7.0.0.zip",
+        "checksum": "f027ad3311ba97b37c15494beed4424a",
+        "timestamp": "2026-11-21T05:24:22Z"
+      },
+      {
         "version": "1.6.0.2",
         "changelog": "https://github.com/ryandash/jellyfin-myanimelist-sync/releases/tag/v1.6.0.2",
         "targetAbi": "10.11.0",
