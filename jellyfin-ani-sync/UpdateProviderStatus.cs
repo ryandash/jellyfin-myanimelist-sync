@@ -682,7 +682,7 @@ namespace jellyfin_ani_sync {
             // MyAnimeList keeps a rewatch in the Completed list. Handle this explicitly so
             // the status never changes to Watching and the rewatch counter is incremented once.
             if (ApiName == ApiName.Mal && detectedAnime.MyListStatus?.Status == Status.Completed) {
-                if (!_userConfig.RewatchCompleted) {
+                if (!_userConfig.RewatchCompleted && !detectedAnime.MyListStatus.IsRewatching) {
                     _logger.LogInformation($"({ApiName}) Rewatching completed entries is disabled; skipping {GetAnimeTitle(detectedAnime)}");
                     return true;
                 }
