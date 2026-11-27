@@ -126,6 +126,14 @@ public class Mal {
         Assert.IsNotNull(makeChange);
     }
 
+    [Test]
+    public void TestMyListStatusDeserializesRewatchCount() {
+        var anime = JsonSerializer.Deserialize<Anime>(
+            "{\"id\":1,\"my_list_status\":{\"num_times_rewatched\":3}}");
+
+        Assert.AreEqual(3, anime?.MyListStatus?.RewatchCount);
+    }
+
     /*[Test]
     [TestCase("The Melancholy of Haruhi Suzumiya", "TheMelancholyofHaruhiSuzumiya")]
     [TestCase("Kono Subarashii Sekai ni Shukufuku wo! 2: Kono Subarashii Geijutsu ni Shukufuku wo! ", "KonoSubarashiiSekainiShukufukuwo!2:KonoSubarashiiGeijutsuniShuku")]
