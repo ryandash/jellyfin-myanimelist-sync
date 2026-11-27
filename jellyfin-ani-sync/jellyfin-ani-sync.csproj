@@ -4,7 +4,7 @@
         <TargetFramework>net10.0</TargetFramework>
         <RootNamespace>jellyfin_ani_sync</RootNamespace>
 
-		<Version>1.7.0.0</Version>
+		<Version>1.7.0.1</Version>
 
 		<DebugType>none</DebugType>
 		<IsPublishable>False</IsPublishable>
