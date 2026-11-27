@@ -688,19 +688,32 @@ namespace jellyfin_ani_sync {
                 }
 
                 if (_animeType == typeof(Movie)) {
-                    int nextRewatchCount = (detectedAnime.MyListStatus.RewatchCount ?? 0) + 1;
-                    _logger.LogInformation($"({ApiName}) Movie ({GetAnimeTitle(detectedAnime)}) replay completed; incrementing rewatch count to {nextRewatchCount}");
+                    _logger.LogInformation($"({ApiName}) Movie ({GetAnimeTitle(detectedAnime)}) replay completed; refreshing MAL's rewatch count");
                     var movieResponse = await ApiCallHelpers.UpdateAnime(
                         detectedAnime.Id,
                         1,
                         Status.Completed,
                         isRewatching: false,
-                        numberOfTimesRewatched: nextRewatchCount,
                         alternativeId: detectedAnime.AlternativeId,
                         ids: _apiIds,
                         isShow: false);
                     if (movieResponse == null) {
-                        _logger.LogError($"({ApiName}) Could not increment movie rewatch count");
+                        _logger.LogError($"({ApiName}) Could not refresh movie status before incrementing rewatch count");
+                    } else {
+                        // MAL returns the authoritative current count in the update response.
+                        // Use it rather than the count from the earlier list lookup, which may be stale.
+                        var countResponse = await ApiCallHelpers.UpdateAnime(
+                            detectedAnime.Id,
+                            1,
+                            Status.Completed,
+                            isRewatching: false,
+                            numberOfTimesRewatched: movieResponse.NumTimesRewatched + 1,
+                            alternativeId: detectedAnime.AlternativeId,
+                            ids: _apiIds,
+                            isShow: false);
+                        if (countResponse == null) {
+                            _logger.LogError($"({ApiName}) Could not increment movie rewatch count");
+                        }
                     }
                     return true;
                 }
@@ -733,23 +746,34 @@ namespace jellyfin_ani_sync {
                     }
 
                     bool rewatchComplete = detectedAnime.NumEpisodes > 0 && indexNumber >= detectedAnime.NumEpisodes;
-                    int? nextRewatchCount = rewatchComplete
-                        ? (detectedAnime.MyListStatus.RewatchCount ?? 0) + 1
-                        : null;
                     _logger.LogInformation(rewatchComplete
-                        ? $"({ApiName}) Rewatch of {GetAnimeTitle(detectedAnime)} completed; clearing rewatching flag and incrementing count to {nextRewatchCount}"
+                        ? $"({ApiName}) Rewatch of {GetAnimeTitle(detectedAnime)} completed; clearing rewatching flag"
                         : $"({ApiName}) Updating rewatch progress for {GetAnimeTitle(detectedAnime)} to episode {indexNumber}");
                     var progressResponse = await ApiCallHelpers.UpdateAnime(
                         detectedAnime.Id,
                         indexNumber,
                         Status.Completed,
                         isRewatching: !rewatchComplete,
-                        numberOfTimesRewatched: nextRewatchCount,
                         alternativeId: detectedAnime.AlternativeId,
                         ids: _apiIds,
                         isShow: true);
                     if (progressResponse == null) {
                         _logger.LogError($"({ApiName}) Could not update rewatch progress");
+                    } else if (rewatchComplete) {
+                        // MAL's update response contains the authoritative current rewatch count.
+                        // Increment from that response so a stale earlier list result cannot overwrite it.
+                        var countResponse = await ApiCallHelpers.UpdateAnime(
+                            detectedAnime.Id,
+                            indexNumber,
+                            Status.Completed,
+                            isRewatching: false,
+                            numberOfTimesRewatched: progressResponse.NumTimesRewatched + 1,
+                            alternativeId: detectedAnime.AlternativeId,
+                            ids: _apiIds,
+                            isShow: true);
+                        if (countResponse == null) {
+                            _logger.LogError($"({ApiName}) Could not increment completed series rewatch count");
+                        }
                     }
                     return true;
                 }
