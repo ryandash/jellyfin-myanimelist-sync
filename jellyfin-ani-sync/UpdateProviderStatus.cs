@@ -679,6 +679,82 @@ namespace jellyfin_ani_sync {
         }
 
         private async Task<bool> CheckIfRewatchCompleted(Anime detectedAnime, int indexNumber, bool overrideCheckRewatch) {
+            // MyAnimeList keeps a rewatch in the Completed list. Handle this explicitly so
+            // the status never changes to Watching and the rewatch counter is incremented once.
+            if (ApiName == ApiName.Mal && detectedAnime.MyListStatus?.Status == Status.Completed) {
+                if (!_userConfig.RewatchCompleted) {
+                    _logger.LogInformation($"({ApiName}) Rewatching completed entries is disabled; skipping {GetAnimeTitle(detectedAnime)}");
+                    return true;
+                }
+
+                if (_animeType == typeof(Movie)) {
+                    int nextRewatchCount = (detectedAnime.MyListStatus.RewatchCount ?? 0) + 1;
+                    _logger.LogInformation($"({ApiName}) Movie ({GetAnimeTitle(detectedAnime)}) replay completed; incrementing rewatch count to {nextRewatchCount}");
+                    var movieResponse = await ApiCallHelpers.UpdateAnime(
+                        detectedAnime.Id,
+                        1,
+                        Status.Completed,
+                        isRewatching: false,
+                        numberOfTimesRewatched: nextRewatchCount,
+                        alternativeId: detectedAnime.AlternativeId,
+                        ids: _apiIds,
+                        isShow: false);
+                    if (movieResponse == null) {
+                        _logger.LogError($"({ApiName}) Could not increment movie rewatch count");
+                    }
+                    return true;
+                }
+
+                if (_animeType == typeof(Episode)) {
+                    if (!detectedAnime.MyListStatus.IsRewatching) {
+                        if (indexNumber != 1) {
+                            _logger.LogInformation($"({ApiName}) Completed series ({GetAnimeTitle(detectedAnime)}) only starts rewatching when episode 1 is played; skipping episode {indexNumber}");
+                            return true;
+                        }
+
+                        _logger.LogInformation($"({ApiName}) Episode 1 played for completed series ({GetAnimeTitle(detectedAnime)}); starting rewatch while keeping status Completed");
+                        var startResponse = await ApiCallHelpers.UpdateAnime(
+                            detectedAnime.Id,
+                            1,
+                            Status.Completed,
+                            isRewatching: true,
+                            alternativeId: detectedAnime.AlternativeId,
+                            ids: _apiIds,
+                            isShow: true);
+                        if (startResponse == null) {
+                            _logger.LogError($"({ApiName}) Could not start series rewatch");
+                        }
+                        return true;
+                    }
+
+                    if (indexNumber <= detectedAnime.MyListStatus.NumEpisodesWatched) {
+                        _logger.LogInformation($"({ApiName}) Rewatch progress for {GetAnimeTitle(detectedAnime)} is already at episode {detectedAnime.MyListStatus.NumEpisodesWatched}; skipping episode {indexNumber}");
+                        return true;
+                    }
+
+                    bool rewatchComplete = detectedAnime.NumEpisodes > 0 && indexNumber >= detectedAnime.NumEpisodes;
+                    int? nextRewatchCount = rewatchComplete
+                        ? (detectedAnime.MyListStatus.RewatchCount ?? 0) + 1
+                        : null;
+                    _logger.LogInformation(rewatchComplete
+                        ? $"({ApiName}) Rewatch of {GetAnimeTitle(detectedAnime)} completed; clearing rewatching flag and incrementing count to {nextRewatchCount}"
+                        : $"({ApiName}) Updating rewatch progress for {GetAnimeTitle(detectedAnime)} to episode {indexNumber}");
+                    var progressResponse = await ApiCallHelpers.UpdateAnime(
+                        detectedAnime.Id,
+                        indexNumber,
+                        Status.Completed,
+                        isRewatching: !rewatchComplete,
+                        numberOfTimesRewatched: nextRewatchCount,
+                        alternativeId: detectedAnime.AlternativeId,
+                        ids: _apiIds,
+                        isShow: true);
+                    if (progressResponse == null) {
+                        _logger.LogError($"({ApiName}) Could not update rewatch progress");
+                    }
+                    return true;
+                }
+            }
+
             if (overrideCheckRewatch ||
                 detectedAnime.MyListStatus is { Status: Status.Completed } ||
                 detectedAnime.MyListStatus is { Status: Status.Rewatching } && detectedAnime.MyListStatus.NumEpisodesWatched < indexNumber) {
